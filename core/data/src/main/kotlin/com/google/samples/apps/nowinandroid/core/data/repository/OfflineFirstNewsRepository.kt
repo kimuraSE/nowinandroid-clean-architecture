@@ -16,6 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.core.data.repository
 
+import com.google.samples.apps.nowinandroid.core.data.Syncable
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
 import com.google.samples.apps.nowinandroid.core.data.changeListSync
 import com.google.samples.apps.nowinandroid.core.data.model.asEntity
@@ -28,6 +29,8 @@ import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
 import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
 import com.google.samples.apps.nowinandroid.core.datastore.ChangeListVersions
 import com.google.samples.apps.nowinandroid.core.datastore.NiaPreferencesDataSource
+import com.google.samples.apps.nowinandroid.core.domain.repository.NewsRepository
+import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
 import com.google.samples.apps.nowinandroid.core.network.NiaNetworkDataSource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkNewsResource
@@ -45,13 +48,13 @@ private const val SYNC_BATCH_SIZE = 40
  * Disk storage backed implementation of the [NewsRepository].
  * Reads are exclusively from local storage to support offline access.
  */
-internal class OfflineFirstNewsRepository @Inject constructor(
+class OfflineFirstNewsRepository @Inject constructor(
     private val niaPreferencesDataSource: NiaPreferencesDataSource,
     private val newsResourceDao: NewsResourceDao,
     private val topicDao: TopicDao,
     private val network: NiaNetworkDataSource,
     private val notifier: Notifier,
-) : NewsRepository {
+) : NewsRepository, Syncable {
 
     override fun getNewsResources(
         query: NewsResourceQuery,

@@ -16,7 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.core.sync.test
 
-import com.google.samples.apps.nowinandroid.core.data.util.SyncManager
+import com.google.samples.apps.nowinandroid.core.domain.util.SyncManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject

@@ -17,7 +17,7 @@
 package com.google.samples.apps.nowinandroid.core.data
 
 import com.google.samples.apps.nowinandroid.core.data.repository.CompositeUserNewsResourceRepository
-import com.google.samples.apps.nowinandroid.core.data.repository.NewsResourceQuery
+import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.model.data.mapToUserNewsResources

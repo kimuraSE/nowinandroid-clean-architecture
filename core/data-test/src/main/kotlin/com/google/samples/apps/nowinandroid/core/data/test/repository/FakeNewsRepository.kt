@@ -18,10 +18,11 @@ package com.google.samples.apps.nowinandroid.core.data.test.repository
 
 import com.google.samples.apps.nowinandroid.core.common.network.Dispatcher
 import com.google.samples.apps.nowinandroid.core.common.network.NiaDispatchers.IO
+import com.google.samples.apps.nowinandroid.core.data.Syncable
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
 import com.google.samples.apps.nowinandroid.core.data.model.asExternalModel
-import com.google.samples.apps.nowinandroid.core.data.repository.NewsRepository
-import com.google.samples.apps.nowinandroid.core.data.repository.NewsResourceQuery
+import com.google.samples.apps.nowinandroid.core.domain.repository.NewsRepository
+import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
 import com.google.samples.apps.nowinandroid.core.network.demo.DemoNiaNetworkDataSource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -39,7 +40,7 @@ import javax.inject.Inject
 class FakeNewsRepository @Inject constructor(
     @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
     private val datasource: DemoNiaNetworkDataSource,
-) : NewsRepository {
+) : NewsRepository, Syncable {
 
     override fun getNewsResources(
         query: NewsResourceQuery,

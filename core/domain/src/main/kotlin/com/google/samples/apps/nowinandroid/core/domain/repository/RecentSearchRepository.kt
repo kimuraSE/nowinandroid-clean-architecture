@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-package com.google.samples.apps.nowinandroid.core.data.model
+package com.google.samples.apps.nowinandroid.core.domain.repository
 
-import com.google.samples.apps.nowinandroid.core.database.model.RecentSearchQueryEntity
 import com.google.samples.apps.nowinandroid.core.model.data.RecentSearchQuery
+import kotlinx.coroutines.flow.Flow
 
 /**
- * Room エンティティ [RecentSearchQueryEntity] をドメインモデル [RecentSearchQuery] に変換する。
+ * Data layer interface for the recent searches.
  */
-fun RecentSearchQueryEntity.asExternalModel() = RecentSearchQuery(
-    query = query,
-    queriedDate = queriedDate,
-)
+interface RecentSearchRepository {
+
+    /**
+     * Get the recent search queries up to the number of queries specified as [limit].
+     */
+    fun getRecentSearchQueries(limit: Int): Flow<List<RecentSearchQuery>>
+
+    /**
+     * Insert or replace the [searchQuery] as part of the recent searches.
+     */
+    suspend fun insertOrReplaceRecentSearch(searchQuery: String)
+
+    /**
+     * Clear the recent searches.
+     */
+    suspend fun clearRecentSearches()
+}

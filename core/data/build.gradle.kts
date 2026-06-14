@@ -26,6 +26,8 @@ android {
 }
 
 dependencies {
+    // data 層は domain 層に依存し、domain の Repository インターフェースを実装する（依存逆転）。
+    api(projects.core.domain)
     api(projects.core.common)
     api(projects.core.database)
     api(projects.core.datastore)

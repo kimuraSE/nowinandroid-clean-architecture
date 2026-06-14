@@ -28,11 +28,11 @@ import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsHelper
 import com.google.samples.apps.nowinandroid.core.common.network.Dispatcher
 import com.google.samples.apps.nowinandroid.core.common.network.NiaDispatchers.IO
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
-import com.google.samples.apps.nowinandroid.core.data.repository.NewsRepository
-import com.google.samples.apps.nowinandroid.core.data.repository.SearchContentsRepository
-import com.google.samples.apps.nowinandroid.core.data.repository.TopicsRepository
+import com.google.samples.apps.nowinandroid.core.data.repository.OfflineFirstNewsRepository
+import com.google.samples.apps.nowinandroid.core.data.repository.OfflineFirstTopicsRepository
 import com.google.samples.apps.nowinandroid.core.datastore.ChangeListVersions
 import com.google.samples.apps.nowinandroid.core.datastore.NiaPreferencesDataSource
+import com.google.samples.apps.nowinandroid.core.domain.repository.SearchContentsRepository
 import com.google.samples.apps.nowinandroid.sync.initializers.SyncConstraints
 import com.google.samples.apps.nowinandroid.sync.initializers.syncForegroundInfo
 import com.google.samples.apps.nowinandroid.sync.status.SyncSubscriber
@@ -52,8 +52,10 @@ internal class SyncWorker @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val niaPreferences: NiaPreferencesDataSource,
-    private val topicRepository: TopicsRepository,
-    private val newsRepository: NewsRepository,
+    // 同期（Syncable）は data 層の関心事。domain の Repository インターフェースは Syncable を
+    // 持たないため、ここでは Syncable を実装する data 層の具象実装を直接注入する。
+    private val topicRepository: OfflineFirstTopicsRepository,
+    private val newsRepository: OfflineFirstNewsRepository,
     private val searchContentsRepository: SearchContentsRepository,
     @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
     private val analyticsHelper: AnalyticsHelper,

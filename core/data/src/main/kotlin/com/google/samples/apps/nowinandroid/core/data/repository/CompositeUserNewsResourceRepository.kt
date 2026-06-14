@@ -16,6 +16,10 @@
 
 package com.google.samples.apps.nowinandroid.core.data.repository
 
+import com.google.samples.apps.nowinandroid.core.domain.repository.NewsRepository
+import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
+import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
+import com.google.samples.apps.nowinandroid.core.domain.repository.UserNewsResourceRepository
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import com.google.samples.apps.nowinandroid.core.model.data.mapToUserNewsResources
 import kotlinx.coroutines.flow.Flow

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.samples.apps.nowinandroid.core.data.model
+package com.google.samples.apps.nowinandroid.core.model.data
 
-import com.google.samples.apps.nowinandroid.core.database.model.RecentSearchQueryEntity
-import com.google.samples.apps.nowinandroid.core.model.data.RecentSearchQuery
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /**
- * Room エンティティ [RecentSearchQueryEntity] をドメインモデル [RecentSearchQuery] に変換する。
+ * 最近の検索クエリを表すドメインモデル（Entity 層）。
  */
-fun RecentSearchQueryEntity.asExternalModel() = RecentSearchQuery(
-    query = query,
-    queriedDate = queriedDate,
+data class RecentSearchQuery(
+    val query: String,
+    val queriedDate: Instant = Clock.System.now(),
 )

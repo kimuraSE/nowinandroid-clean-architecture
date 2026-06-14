@@ -18,8 +18,9 @@ package com.google.samples.apps.nowinandroid.core.data.test.repository
 
 import com.google.samples.apps.nowinandroid.core.common.network.Dispatcher
 import com.google.samples.apps.nowinandroid.core.common.network.NiaDispatchers.IO
+import com.google.samples.apps.nowinandroid.core.data.Syncable
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
-import com.google.samples.apps.nowinandroid.core.data.repository.TopicsRepository
+import com.google.samples.apps.nowinandroid.core.domain.repository.TopicsRepository
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.network.demo.DemoNiaNetworkDataSource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -39,7 +40,7 @@ import javax.inject.Inject
 internal class FakeTopicsRepository @Inject constructor(
     @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
     private val datasource: DemoNiaNetworkDataSource,
-) : TopicsRepository {
+) : TopicsRepository, Syncable {
     override fun getTopics(): Flow<List<Topic>> = flow {
         emit(
             datasource.getTopics().map {

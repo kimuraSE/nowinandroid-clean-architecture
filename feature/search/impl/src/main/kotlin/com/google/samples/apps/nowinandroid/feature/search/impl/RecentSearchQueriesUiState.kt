@@ -16,7 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.feature.search.impl
 
-import com.google.samples.apps.nowinandroid.core.data.model.RecentSearchQuery
+import com.google.samples.apps.nowinandroid.core.model.data.RecentSearchQuery
 
 sealed interface RecentSearchQueriesUiState {
     data object Loading : RecentSearchQueriesUiState

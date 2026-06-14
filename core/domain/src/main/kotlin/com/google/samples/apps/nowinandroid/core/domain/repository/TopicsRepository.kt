@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-plugins {
-    alias(libs.plugins.nowinandroid.android.library)
-    alias(libs.plugins.nowinandroid.android.library.jacoco)
-    id("com.google.devtools.ksp")
-}
 
-android {
-    namespace = "com.google.samples.apps.nowinandroid.core.domain"
-}
+package com.google.samples.apps.nowinandroid.core.domain.repository
 
-dependencies {
-    // Entity 層（Enterprise Business Rules）にのみ依存する。
-    // data 層には依存しない（依存逆転）。Repository は domain のインターフェースを参照する。
-    api(projects.core.model)
+import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import kotlinx.coroutines.flow.Flow
 
-    api(libs.kotlinx.coroutines.core)
-    implementation(libs.javax.inject)
+/**
+ * ドメイン層の Repository 契約（Application Business Rules）。
+ * 同期（Syncable）は data 層の関心事であり、本インターフェースは知らない。
+ */
+interface TopicsRepository {
+    /**
+     * Gets the available topics as a stream
+     */
+    fun getTopics(): Flow<List<Topic>>
 
-    testImplementation(projects.core.testing)
+    /**
+     * Gets data for a specific topic
+     */
+    fun getTopic(id: String): Flow<Topic>
 }

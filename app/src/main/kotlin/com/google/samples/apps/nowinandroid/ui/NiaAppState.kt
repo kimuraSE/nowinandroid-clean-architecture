@@ -21,9 +21,9 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation3.runtime.NavKey
-import com.google.samples.apps.nowinandroid.core.data.repository.UserNewsResourceRepository
 import com.google.samples.apps.nowinandroid.core.data.util.NetworkMonitor
 import com.google.samples.apps.nowinandroid.core.data.util.TimeZoneMonitor
+import com.google.samples.apps.nowinandroid.core.domain.repository.UserNewsResourceRepository
 import com.google.samples.apps.nowinandroid.core.navigation.NavigationState
 import com.google.samples.apps.nowinandroid.core.navigation.rememberNavigationState
 import com.google.samples.apps.nowinandroid.core.ui.TrackDisposableJank

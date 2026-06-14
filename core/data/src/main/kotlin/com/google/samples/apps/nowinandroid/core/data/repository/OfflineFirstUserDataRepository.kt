@@ -19,6 +19,7 @@ package com.google.samples.apps.nowinandroid.core.data.repository
 import androidx.annotation.VisibleForTesting
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsHelper
 import com.google.samples.apps.nowinandroid.core.datastore.NiaPreferencesDataSource
+import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand
 import com.google.samples.apps.nowinandroid.core.model.data.UserData

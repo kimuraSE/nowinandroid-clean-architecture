@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.samples.apps.nowinandroid.core.data.model
+package com.google.samples.apps.nowinandroid.core.domain.util
 
-import com.google.samples.apps.nowinandroid.core.database.model.RecentSearchQueryEntity
-import com.google.samples.apps.nowinandroid.core.model.data.RecentSearchQuery
+import kotlinx.coroutines.flow.Flow
 
 /**
- * Room エンティティ [RecentSearchQueryEntity] をドメインモデル [RecentSearchQuery] に変換する。
+ * 同期が進行中かどうかを報告し、同期を要求するための抽象（ポート）。
+ * 実装（WorkManagerSyncManager）は sync 層にあり、presentation はこの抽象にのみ依存する。
  */
-fun RecentSearchQueryEntity.asExternalModel() = RecentSearchQuery(
-    query = query,
-    queriedDate = queriedDate,
-)
+interface SyncManager {
+    val isSyncing: Flow<Boolean>
+    fun requestSync()
+}

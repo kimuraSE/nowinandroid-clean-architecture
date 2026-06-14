@@ -16,6 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.core.data.repository
 
+import com.google.samples.apps.nowinandroid.core.data.Syncable
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
 import com.google.samples.apps.nowinandroid.core.data.changeListSync
 import com.google.samples.apps.nowinandroid.core.data.model.asEntity
@@ -23,6 +24,7 @@ import com.google.samples.apps.nowinandroid.core.database.dao.TopicDao
 import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
 import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
 import com.google.samples.apps.nowinandroid.core.datastore.ChangeListVersions
+import com.google.samples.apps.nowinandroid.core.domain.repository.TopicsRepository
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.network.NiaNetworkDataSource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkTopic
@@ -34,10 +36,10 @@ import javax.inject.Inject
  * Disk storage backed implementation of the [TopicsRepository].
  * Reads are exclusively from local storage to support offline access.
  */
-internal class OfflineFirstTopicsRepository @Inject constructor(
+class OfflineFirstTopicsRepository @Inject constructor(
     private val topicDao: TopicDao,
     private val network: NiaNetworkDataSource,
-) : TopicsRepository {
+) : TopicsRepository, Syncable {
 
     override fun getTopics(): Flow<List<Topic>> =
         topicDao.getTopicEntities()

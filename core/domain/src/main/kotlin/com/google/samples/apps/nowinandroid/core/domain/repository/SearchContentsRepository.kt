@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package com.google.samples.apps.nowinandroid.core.data.model
+package com.google.samples.apps.nowinandroid.core.domain.repository
 
-import com.google.samples.apps.nowinandroid.core.database.model.RecentSearchQueryEntity
-import com.google.samples.apps.nowinandroid.core.model.data.RecentSearchQuery
+import com.google.samples.apps.nowinandroid.core.model.data.SearchResult
+import kotlinx.coroutines.flow.Flow
 
 /**
- * Room エンティティ [RecentSearchQueryEntity] をドメインモデル [RecentSearchQuery] に変換する。
+ * Data layer interface for the search feature.
  */
-fun RecentSearchQueryEntity.asExternalModel() = RecentSearchQuery(
-    query = query,
-    queriedDate = queriedDate,
-)
+interface SearchContentsRepository {
+
+    /**
+     * Populate the fts tables for the search contents.
+     */
+    suspend fun populateFtsData()
+
+    /**
+     * Query the contents matched with the [searchQuery] and returns it as a [Flow] of [SearchResult]
+     */
+    fun searchContents(searchQuery: String): Flow<SearchResult>
+
+    fun getSearchContentsCount(): Flow<Int>
+}

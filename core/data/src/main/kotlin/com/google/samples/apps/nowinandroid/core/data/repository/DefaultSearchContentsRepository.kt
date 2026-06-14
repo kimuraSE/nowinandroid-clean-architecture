@@ -25,6 +25,7 @@ import com.google.samples.apps.nowinandroid.core.database.dao.TopicFtsDao
 import com.google.samples.apps.nowinandroid.core.database.model.PopulatedNewsResource
 import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
 import com.google.samples.apps.nowinandroid.core.database.model.asFtsEntity
+import com.google.samples.apps.nowinandroid.core.domain.repository.SearchContentsRepository
 import com.google.samples.apps.nowinandroid.core.model.data.SearchResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
