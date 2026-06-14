@@ -20,9 +20,9 @@ package com.google.samples.apps.nowinandroid.core.model.data
  * Class summarizing user interest data
  */
 data class UserData(
-    val bookmarkedNewsResources: Set<String>,
-    val viewedNewsResources: Set<String>,
-    val followedTopics: Set<String>,
+    val bookmarkedNewsResources: Set<NewsResourceId>,
+    val viewedNewsResources: Set<NewsResourceId>,
+    val followedTopics: Set<TopicId>,
     val themeBrand: ThemeBrand,
     val darkThemeConfig: DarkThemeConfig,
     val useDynamicColor: Boolean,

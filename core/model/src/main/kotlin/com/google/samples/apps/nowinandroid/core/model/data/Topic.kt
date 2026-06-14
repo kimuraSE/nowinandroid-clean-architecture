@@ -20,7 +20,7 @@ package com.google.samples.apps.nowinandroid.core.model.data
  * External data layer representation of a NiA Topic
  */
 data class Topic(
-    val id: String,
+    val id: TopicId,
     val name: String,
     val shortDescription: String,
     val longDescription: String,

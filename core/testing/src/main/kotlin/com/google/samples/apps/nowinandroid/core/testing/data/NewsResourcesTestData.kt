@@ -19,11 +19,12 @@
 package com.google.samples.apps.nowinandroid.core.testing.data
 
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import kotlinx.datetime.Instant
 
 val newsResourcesTestData: List<NewsResource> = listOf(
     NewsResource(
-        id = "1",
+        id = NewsResourceId("1"),
         title = "Android Basics with Compose",
         content = "We released the first two units of Android Basics with Compose, our first free course that teaches Android Development with Jetpack Compose to anyone; you do not need any prior programming experience other than basic computer literacy to get started. You’ll learn the fundamentals of programming in Kotlin while building Android apps using Jetpack Compose, Android’s modern toolkit that simplifies and accelerates native UI development. These two units are just the beginning; more will be coming soon. Check out Android Basics with Compose to get started on your Android development journey",
         url = "https://android-developers.googleblog.com/2022/05/new-android-basics-with-compose-course.html",
@@ -33,7 +34,7 @@ val newsResourcesTestData: List<NewsResource> = listOf(
         topics = listOf(topicsTestData[1]),
     ),
     NewsResource(
-        id = "2",
+        id = NewsResourceId("2"),
         title = "Thanks for helping us reach 1M YouTube Subscribers",
         content = "Thank you everyone for following the Now in Android series and everything the " +
             "Android Developers YouTube channel has to offer. During the Android Developer " +
@@ -46,7 +47,7 @@ val newsResourcesTestData: List<NewsResource> = listOf(
         topics = listOf(topicsTestData[0], topicsTestData[1]),
     ),
     NewsResource(
-        id = "3",
+        id = NewsResourceId("3"),
         title = "Transformations and customisations in the Paging Library",
         content = "A demonstration of different operations that can be performed " +
             "with Paging. Transformations like inserting separators, when to " +
@@ -59,7 +60,7 @@ val newsResourcesTestData: List<NewsResource> = listOf(
         topics = listOf(topicsTestData[2]),
     ),
     NewsResource(
-        id = "4",
+        id = NewsResourceId("4"),
         title = "New Jetpack Release",
         content = "New Jetpack release includes updates to libraries such as CameraX, Benchmark, and" +
             "more!",

@@ -25,7 +25,9 @@ import com.google.samples.apps.nowinandroid.core.domain.repository.TopicsReposit
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserNewsResourceRepository
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -70,19 +72,19 @@ class TopicViewModel @AssistedInject constructor(
 
     fun followTopicToggle(followed: Boolean) {
         viewModelScope.launch {
-            userDataRepository.setTopicIdFollowed(topicId, followed)
+            userDataRepository.setTopicIdFollowed(TopicId(topicId), followed)
         }
     }
 
     fun bookmarkNews(newsResourceId: String, bookmarked: Boolean) {
         viewModelScope.launch {
-            userDataRepository.setNewsResourceBookmarked(newsResourceId, bookmarked)
+            userDataRepository.setNewsResourceBookmarked(NewsResourceId(newsResourceId), bookmarked)
         }
     }
 
     fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) {
         viewModelScope.launch {
-            userDataRepository.setNewsResourceViewed(newsResourceId, viewed)
+            userDataRepository.setNewsResourceViewed(NewsResourceId(newsResourceId), viewed)
         }
     }
 
@@ -100,13 +102,13 @@ private fun topicUiState(
     topicsRepository: TopicsRepository,
 ): Flow<TopicUiState> {
     // Observe the followed topics, as they could change over time.
-    val followedTopicIds: Flow<Set<String>> =
+    val followedTopicIds: Flow<Set<TopicId>> =
         userDataRepository.userData
             .map { it.followedTopics }
 
     // Observe topic information
     val topicStream: Flow<Topic> = topicsRepository.getTopic(
-        id = topicId,
+        id = TopicId(topicId),
     )
 
     return combine(
@@ -122,7 +124,7 @@ private fun topicUiState(
                     TopicUiState.Success(
                         followableTopic = FollowableTopic(
                             topic = topic,
-                            isFollowed = topicId in followedTopics,
+                            isFollowed = TopicId(topicId) in followedTopics,
                         ),
                     )
                 }
@@ -140,11 +142,11 @@ private fun newsUiState(
 ): Flow<NewsUiState> {
     // Observe news
     val newsStream: Flow<List<UserNewsResource>> = userNewsResourceRepository.observeAll(
-        NewsResourceQuery(filterTopicIds = setOf(element = topicId)),
+        NewsResourceQuery(filterTopicIds = setOf(element = TopicId(topicId))),
     )
 
     // Observe bookmarks
-    val bookmark: Flow<Set<String>> = userDataRepository.userData
+    val bookmark: Flow<Set<NewsResourceId>> = userDataRepository.userData
         .map { it.bookmarkedNewsResources }
 
     return combine(newsStream, bookmark, ::Pair)

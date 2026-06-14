@@ -85,7 +85,7 @@ class InterestsListDetailScreenTest {
     private val placeholderText by composeTestRule.stringResource(R.string.feature_interests_api_select_an_interest)
 
     private val Topic.testTag
-        get() = "topic:${this.id}"
+        get() = "topic:${this.id.value}"
 
     @Before
     fun setup() {

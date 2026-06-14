@@ -17,6 +17,7 @@
 package com.google.samples.apps.nowinandroid.core.network.model
 
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import kotlinx.serialization.Serializable
 
 /**
@@ -35,7 +36,7 @@ data class NetworkTopic(
 
 fun NetworkTopic.asExternalModel(): Topic =
     Topic(
-        id = id,
+        id = TopicId(id),
         name = name,
         shortDescription = shortDescription,
         longDescription = longDescription,

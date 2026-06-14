@@ -17,6 +17,8 @@
 package com.google.samples.apps.nowinandroid.core.domain.repository
 
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -26,11 +28,11 @@ data class NewsResourceQuery(
     /**
      * Topic ids to filter for. Null means any topic id will match.
      */
-    val filterTopicIds: Set<String>? = null,
+    val filterTopicIds: Set<TopicId>? = null,
     /**
      * News ids to filter for. Null means any news id will match.
      */
-    val filterNewsIds: Set<String>? = null,
+    val filterNewsIds: Set<NewsResourceId>? = null,
 )
 
 /**

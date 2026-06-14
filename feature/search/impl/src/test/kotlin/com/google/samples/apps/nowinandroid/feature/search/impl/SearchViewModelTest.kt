@@ -20,6 +20,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.samples.apps.nowinandroid.core.analytics.NoOpAnalyticsHelper
 import com.google.samples.apps.nowinandroid.core.domain.GetRecentSearchQueriesUseCase
 import com.google.samples.apps.nowinandroid.core.domain.GetSearchContentsUseCase
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.testing.data.newsResourcesTestData
 import com.google.samples.apps.nowinandroid.core.testing.data.topicsTestData
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestRecentSearchRepository
@@ -166,7 +167,7 @@ class SearchViewModelTest {
         viewModel.setNewsResourceBookmarked(newsResourceId, true)
 
         assertEquals(
-            expected = setOf(newsResourceId),
+            expected = setOf(NewsResourceId(newsResourceId)),
             actual = userDataRepository.userData.first().bookmarkedNewsResources,
         )
 

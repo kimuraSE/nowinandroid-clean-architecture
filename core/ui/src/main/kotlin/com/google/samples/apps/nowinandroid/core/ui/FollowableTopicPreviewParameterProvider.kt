@@ -21,6 +21,7 @@ package com.google.samples.apps.nowinandroid.core.ui
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 
 /**
  * This [PreviewParameterProvider](https://developer.android.com/reference/kotlin/androidx/compose/ui/tooling/preview/PreviewParameterProvider)
@@ -32,7 +33,7 @@ class FollowableTopicPreviewParameterProvider : PreviewParameterProvider<List<Fo
             listOf(
                 FollowableTopic(
                     topic = Topic(
-                        id = "2",
+                        id = TopicId("2"),
                         name = "Headlines",
                         shortDescription = "News we want everyone to see",
                         longDescription = "Stay up to date with the latest events and announcements from Android!",
@@ -43,7 +44,7 @@ class FollowableTopicPreviewParameterProvider : PreviewParameterProvider<List<Fo
                 ),
                 FollowableTopic(
                     topic = Topic(
-                        id = "3",
+                        id = TopicId("3"),
                         name = "UI",
                         shortDescription = "Material Design, Navigation, Text, Paging, Accessibility (a11y), Internationalization (i18n), Localization (l10n), Animations, Large Screens, Widgets",
                         longDescription = "Learn how to optimize your app's user interface - everything that users can see and interact with. Stay up to date on topics such as Material Design, Navigation, Text, Paging, Compose, Accessibility (a11y), Internationalization (i18n), Localization (l10n), Animations, Large Screens, Widgets, and many more!",
@@ -54,7 +55,7 @@ class FollowableTopicPreviewParameterProvider : PreviewParameterProvider<List<Fo
                 ),
                 FollowableTopic(
                     topic = Topic(
-                        id = "4",
+                        id = TopicId("4"),
                         name = "Testing",
                         shortDescription = "CI, Espresso, TestLab, etc",
                         longDescription = "Testing is an integral part of the app development process. By running tests against your app consistently, you can verify your app's correctness, functional behavior, and usability before you release it publicly. Stay up to date on the latest tricks in CI, Espresso, and Firebase TestLab.",

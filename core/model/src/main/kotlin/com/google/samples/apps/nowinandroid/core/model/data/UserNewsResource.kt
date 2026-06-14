@@ -23,7 +23,7 @@ import kotlinx.datetime.Instant
  * news resource's topics and whether they have saved (bookmarked) this news resource.
  */
 data class UserNewsResource internal constructor(
-    val id: String,
+    val id: NewsResourceId,
     val title: String,
     val content: String,
     val url: String,

@@ -17,7 +17,9 @@
 package com.google.samples.apps.nowinandroid.core.data.model
 
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkNewsResource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkTopic
 import com.google.samples.apps.nowinandroid.core.network.model.asExternalModel
@@ -82,7 +84,7 @@ class NetworkEntityTest {
         )
 
         val expected = Topic(
-            id = "0",
+            id = TopicId("0"),
             name = "Test",
             shortDescription = "short description",
             longDescription = "long description",
@@ -126,7 +128,7 @@ class NetworkEntityTest {
         )
 
         val expected = NewsResource(
-            id = "0",
+            id = NewsResourceId("0"),
             title = "title",
             content = "content",
             url = "url",

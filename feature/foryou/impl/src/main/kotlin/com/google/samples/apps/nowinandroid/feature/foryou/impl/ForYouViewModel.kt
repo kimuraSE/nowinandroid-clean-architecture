@@ -27,6 +27,8 @@ import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQ
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserNewsResourceRepository
 import com.google.samples.apps.nowinandroid.core.domain.util.SyncManager
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.notifications.DEEP_LINK_NEWS_RESOURCE_ID_KEY
 import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -64,7 +66,7 @@ class ForYouViewModel @Inject constructor(
             } else {
                 userNewsResourceRepository.observeAll(
                     NewsResourceQuery(
-                        filterNewsIds = setOf(newsResourceId),
+                        filterNewsIds = setOf(NewsResourceId(newsResourceId)),
                     ),
                 )
             }
@@ -111,30 +113,30 @@ class ForYouViewModel @Inject constructor(
 
     fun updateTopicSelection(topicId: String, isChecked: Boolean) {
         viewModelScope.launch {
-            userDataRepository.setTopicIdFollowed(topicId, isChecked)
+            userDataRepository.setTopicIdFollowed(TopicId(topicId), isChecked)
         }
     }
 
     fun updateNewsResourceSaved(newsResourceId: String, isChecked: Boolean) {
         viewModelScope.launch {
-            userDataRepository.setNewsResourceBookmarked(newsResourceId, isChecked)
+            userDataRepository.setNewsResourceBookmarked(NewsResourceId(newsResourceId), isChecked)
         }
     }
 
     fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) {
         viewModelScope.launch {
-            userDataRepository.setNewsResourceViewed(newsResourceId, viewed)
+            userDataRepository.setNewsResourceViewed(NewsResourceId(newsResourceId), viewed)
         }
     }
 
     fun onDeepLinkOpened(newsResourceId: String) {
-        if (newsResourceId == deepLinkedNewsResource.value?.id) {
+        if (newsResourceId == deepLinkedNewsResource.value?.id?.value) {
             savedStateHandle[DEEP_LINK_NEWS_RESOURCE_ID_KEY] = null
         }
         analyticsHelper.logNewsDeepLinkOpen(newsResourceId = newsResourceId)
         viewModelScope.launch {
             userDataRepository.setNewsResourceViewed(
-                newsResourceId = newsResourceId,
+                newsResourceId = NewsResourceId(newsResourceId),
                 viewed = true,
             )
         }

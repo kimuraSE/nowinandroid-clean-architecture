@@ -64,7 +64,7 @@ fun TopicsTabContent(
             state = scrollableState,
         ) {
             topics.forEach { followableTopic ->
-                val topicId = followableTopic.topic.id
+                val topicId = followableTopic.topic.id.value
                 item(key = topicId) {
                     val isSelected = shouldHighlightSelectedTopic && topicId == selectedTopicId
                     InterestsItem(

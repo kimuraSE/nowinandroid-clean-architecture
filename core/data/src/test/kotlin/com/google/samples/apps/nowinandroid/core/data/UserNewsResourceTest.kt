@@ -19,8 +19,10 @@ package com.google.samples.apps.nowinandroid.core.data
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig.FOLLOW_SYSTEM
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand.DEFAULT
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import kotlinx.datetime.Clock
@@ -38,7 +40,7 @@ class UserNewsResourceTest {
     @Test
     fun userNewsResourcesAreConstructedFromNewsResourcesAndUserData() {
         val newsResource1 = NewsResource(
-            id = "N1",
+            id = NewsResourceId("N1"),
             title = "Test news title",
             content = "Test news content",
             url = "Test URL",
@@ -47,7 +49,7 @@ class UserNewsResourceTest {
             type = "Article 📚",
             topics = listOf(
                 Topic(
-                    id = "T1",
+                    id = TopicId("T1"),
                     name = "Topic 1",
                     shortDescription = "Topic 1 short description",
                     longDescription = "Topic 1 long description",
@@ -55,7 +57,7 @@ class UserNewsResourceTest {
                     imageUrl = "Topic 1 image URL",
                 ),
                 Topic(
-                    id = "T2",
+                    id = TopicId("T2"),
                     name = "Topic 2",
                     shortDescription = "Topic 2 short description",
                     longDescription = "Topic 2 long description",
@@ -66,9 +68,9 @@ class UserNewsResourceTest {
         )
 
         val userData = UserData(
-            bookmarkedNewsResources = setOf("N1"),
-            viewedNewsResources = setOf("N1"),
-            followedTopics = setOf("T1"),
+            bookmarkedNewsResources = setOf(NewsResourceId("N1")),
+            viewedNewsResources = setOf(NewsResourceId("N1")),
+            followedTopics = setOf(TopicId("T1")),
             themeBrand = DEFAULT,
             darkThemeConfig = FOLLOW_SYSTEM,
             useDynamicColor = false,

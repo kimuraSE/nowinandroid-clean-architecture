@@ -19,6 +19,7 @@ package com.google.samples.apps.nowinandroid.core.domain
 import com.google.samples.apps.nowinandroid.core.domain.TopicSortField.NAME
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestTopicsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
 import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
@@ -85,7 +86,7 @@ class GetFollowableTopicsUseCaseTest {
 }
 
 private val testTopics = listOf(
-    Topic("1", "Headlines", "", "", "", ""),
-    Topic("2", "Android Studio", "", "", "", ""),
-    Topic("3", "Compose", "", "", "", ""),
+    Topic(TopicId("1"), "Headlines", "", "", "", ""),
+    Topic(TopicId("2"), "Android Studio", "", "", "", ""),
+    Topic(TopicId("3"), "Compose", "", "", "", ""),
 )

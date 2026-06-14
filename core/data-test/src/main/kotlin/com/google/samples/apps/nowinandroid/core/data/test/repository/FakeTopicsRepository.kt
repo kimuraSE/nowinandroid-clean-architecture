@@ -22,6 +22,7 @@ import com.google.samples.apps.nowinandroid.core.data.Syncable
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
 import com.google.samples.apps.nowinandroid.core.domain.repository.TopicsRepository
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.network.demo.DemoNiaNetworkDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -45,7 +46,7 @@ internal class FakeTopicsRepository @Inject constructor(
         emit(
             datasource.getTopics().map {
                 Topic(
-                    id = it.id,
+                    id = TopicId(it.id),
                     name = it.name,
                     shortDescription = it.shortDescription,
                     longDescription = it.longDescription,
@@ -56,7 +57,7 @@ internal class FakeTopicsRepository @Inject constructor(
         )
     }.flowOn(ioDispatcher)
 
-    override fun getTopic(id: String): Flow<Topic> = getTopics()
+    override fun getTopic(id: TopicId): Flow<Topic> = getTopics()
         .map { it.first { topic -> topic.id == id } }
 
     override suspend fun syncWith(synchronizer: Synchronizer) = true

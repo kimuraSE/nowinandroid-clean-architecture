@@ -238,7 +238,7 @@ private fun LazyListScope.userNewsResourceCards(
         is NewsUiState.Success -> {
             userNewsResourceCardItems(
                 items = news.news,
-                onToggleBookmark = { onBookmarkChanged(it.id, !it.isSaved) },
+                onToggleBookmark = { onBookmarkChanged(it.id.value, !it.isSaved) },
                 onNewsResourceViewed = onNewsResourceViewed,
                 onTopicClick = onTopicClick,
                 itemModifier = Modifier.padding(24.dp),

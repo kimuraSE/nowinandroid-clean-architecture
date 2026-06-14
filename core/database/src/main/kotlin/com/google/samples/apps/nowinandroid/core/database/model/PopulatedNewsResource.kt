@@ -20,6 +20,7 @@ import androidx.room.Embedded
 import androidx.room.Junction
 import androidx.room.Relation
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 
 /**
  * External data layer representation of a fully populated NiA news resource
@@ -40,7 +41,7 @@ data class PopulatedNewsResource(
 )
 
 fun PopulatedNewsResource.asExternalModel() = NewsResource(
-    id = entity.id,
+    id = NewsResourceId(entity.id),
     title = entity.title,
     content = entity.content,
     url = entity.url,

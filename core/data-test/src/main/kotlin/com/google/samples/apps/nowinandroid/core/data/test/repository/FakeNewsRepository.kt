@@ -24,6 +24,7 @@ import com.google.samples.apps.nowinandroid.core.data.model.asExternalModel
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.network.demo.DemoNiaNetworkDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -57,9 +58,9 @@ class FakeNewsRepository @Inject constructor(
                         // then the news resource is returned.
                         listOfNotNull(
                             true,
-                            query.filterNewsIds?.contains(networkNewsResource.id),
+                            query.filterNewsIds?.contains(NewsResourceId(networkNewsResource.id)),
                             query.filterTopicIds?.let { filterTopicIds ->
-                                networkNewsResource.topics.intersect(filterTopicIds).isNotEmpty()
+                                networkNewsResource.topics.intersect(filterTopicIds.map { it.value }.toSet()).isNotEmpty()
                             },
                         )
                             .all(true::equals)

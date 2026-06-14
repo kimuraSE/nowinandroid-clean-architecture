@@ -21,8 +21,10 @@ package com.google.samples.apps.nowinandroid.core.ui
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import com.google.samples.apps.nowinandroid.core.ui.PreviewParameterData.newsResources
@@ -43,8 +45,8 @@ class UserNewsResourcePreviewParameterProvider : PreviewParameterProvider<List<U
 object PreviewParameterData {
 
     private val userData: UserData = UserData(
-        bookmarkedNewsResources = setOf("1", "3"),
-        viewedNewsResources = setOf("1", "2", "4"),
+        bookmarkedNewsResources = setOf(NewsResourceId("1"), NewsResourceId("3")),
+        viewedNewsResources = setOf(NewsResourceId("1"), NewsResourceId("2"), NewsResourceId("4")),
         followedTopics = emptySet(),
         themeBrand = ThemeBrand.ANDROID,
         darkThemeConfig = DarkThemeConfig.DARK,
@@ -54,7 +56,7 @@ object PreviewParameterData {
 
     val topics = listOf(
         Topic(
-            id = "2",
+            id = TopicId("2"),
             name = "Headlines",
             shortDescription = "News we want everyone to see",
             longDescription = "Stay up to date with the latest events and announcements from Android!",
@@ -62,7 +64,7 @@ object PreviewParameterData {
             url = "",
         ),
         Topic(
-            id = "3",
+            id = TopicId("3"),
             name = "UI",
             shortDescription = "Material Design, Navigation, Text, Paging, Accessibility (a11y), Internationalization (i18n), Localization (l10n), Animations, Large Screens, Widgets",
             longDescription = "Learn how to optimize your app's user interface - everything that users can see and interact with. Stay up to date on topics such as Material Design, Navigation, Text, Paging, Compose, Accessibility (a11y), Internationalization (i18n), Localization (l10n), Animations, Large Screens, Widgets, and many more!",
@@ -70,7 +72,7 @@ object PreviewParameterData {
             url = "",
         ),
         Topic(
-            id = "4",
+            id = TopicId("4"),
             name = "Testing",
             shortDescription = "CI, Espresso, TestLab, etc",
             longDescription = "Testing is an integral part of the app development process. By running tests against your app consistently, you can verify your app's correctness, functional behavior, and usability before you release it publicly. Stay up to date on the latest tricks in CI, Espresso, and Firebase TestLab.",
@@ -82,7 +84,7 @@ object PreviewParameterData {
     val newsResources = listOf(
         UserNewsResource(
             newsResource = NewsResource(
-                id = "1",
+                id = NewsResourceId("1"),
                 title = "Android Basics with Compose",
                 content = "We released the first two units of Android Basics with Compose, our first free course that teaches Android Development with Jetpack Compose to anyone; you do not need any prior programming experience other than basic computer literacy to get started. You’ll learn the fundamentals of programming in Kotlin while building Android apps using Jetpack Compose, Android’s modern toolkit that simplifies and accelerates native UI development. These two units are just the beginning; more will be coming soon. Check out Android Basics with Compose to get started on your Android development journey",
                 url = "https://android-developers.googleblog.com/2022/05/new-android-basics-with-compose-course.html",
@@ -103,7 +105,7 @@ object PreviewParameterData {
         ),
         UserNewsResource(
             newsResource = NewsResource(
-                id = "2",
+                id = NewsResourceId("2"),
                 title = "Thanks for helping us reach 1M YouTube Subscribers",
                 content = "Thank you everyone for following the Now in Android series and everything the " +
                     "Android Developers YouTube channel has to offer. During the Android Developer " +
@@ -119,7 +121,7 @@ object PreviewParameterData {
         ),
         UserNewsResource(
             newsResource = NewsResource(
-                id = "3",
+                id = NewsResourceId("3"),
                 title = "Transformations and customisations in the Paging Library",
                 content = "A demonstration of different operations that can be performed " +
                     "with Paging. Transformations like inserting separators, when to " +

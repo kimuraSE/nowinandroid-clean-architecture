@@ -17,7 +17,9 @@
 package com.google.samples.apps.nowinandroid.core.database.model
 
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import kotlinx.datetime.Instant
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -50,7 +52,7 @@ class PopulatedNewsResourceKtTest {
 
         assertEquals(
             NewsResource(
-                id = "1",
+                id = NewsResourceId("1"),
                 title = "news",
                 content = "Hilt",
                 url = "url",
@@ -59,7 +61,7 @@ class PopulatedNewsResourceKtTest {
                 publishDate = Instant.fromEpochMilliseconds(1),
                 topics = listOf(
                     Topic(
-                        id = "3",
+                        id = TopicId("3"),
                         name = "name",
                         shortDescription = "short description",
                         longDescription = "long description",

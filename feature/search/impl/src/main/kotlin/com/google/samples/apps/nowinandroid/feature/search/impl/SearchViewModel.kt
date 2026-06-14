@@ -27,6 +27,8 @@ import com.google.samples.apps.nowinandroid.core.domain.GetSearchContentsUseCase
 import com.google.samples.apps.nowinandroid.core.domain.repository.RecentSearchRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.SearchContentsRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -117,19 +119,19 @@ class SearchViewModel @Inject constructor(
 
     fun setNewsResourceBookmarked(newsResourceId: String, isChecked: Boolean) {
         viewModelScope.launch {
-            userDataRepository.setNewsResourceBookmarked(newsResourceId, isChecked)
+            userDataRepository.setNewsResourceBookmarked(NewsResourceId(newsResourceId), isChecked)
         }
     }
 
     fun followTopic(followedTopicId: String, followed: Boolean) {
         viewModelScope.launch {
-            userDataRepository.setTopicIdFollowed(followedTopicId, followed)
+            userDataRepository.setTopicIdFollowed(TopicId(followedTopicId), followed)
         }
     }
 
     fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) {
         viewModelScope.launch {
-            userDataRepository.setNewsResourceViewed(newsResourceId, viewed)
+            userDataRepository.setNewsResourceViewed(NewsResourceId(newsResourceId), viewed)
         }
     }
 }

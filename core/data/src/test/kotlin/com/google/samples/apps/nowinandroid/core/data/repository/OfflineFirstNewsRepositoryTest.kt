@@ -36,7 +36,9 @@ import com.google.samples.apps.nowinandroid.core.datastore.UserPreferences
 import com.google.samples.apps.nowinandroid.core.datastore.test.InMemoryDataStore
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkChangeList
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkNewsResource
 import com.google.samples.apps.nowinandroid.core.testing.notifications.TestNotifier
@@ -112,7 +114,7 @@ class OfflineFirstNewsRepositoryTest {
                     .map(PopulatedNewsResource::asExternalModel),
                 actual = subject.getNewsResources(
                     query = NewsResourceQuery(
-                        filterTopicIds = filteredInterestsIds,
+                        filterTopicIds = filteredInterestsIds.mapTo(mutableSetOf(), ::TopicId),
                     ),
                 )
                     .first(),
@@ -122,7 +124,7 @@ class OfflineFirstNewsRepositoryTest {
                 expected = emptyList(),
                 actual = subject.getNewsResources(
                     query = NewsResourceQuery(
-                        filterTopicIds = nonPresentInterestsIds,
+                        filterTopicIds = nonPresentInterestsIds.mapTo(mutableSetOf(), ::TopicId),
                     ),
                 )
                     .first(),
@@ -145,8 +147,8 @@ class OfflineFirstNewsRepositoryTest {
                 .map(PopulatedNewsResource::asExternalModel)
 
             assertEquals(
-                newsResourcesFromNetwork.map(NewsResource::id).sorted(),
-                newsResourcesFromDb.map(NewsResource::id).sorted(),
+                newsResourcesFromNetwork.map { it.id.value }.sorted(),
+                newsResourcesFromDb.map { it.id.value }.sorted(),
             )
 
             // After sync version should be updated
@@ -172,14 +174,14 @@ class OfflineFirstNewsRepositoryTest {
             // Delete half of the items on the network
             val deletedItems = newsResourcesFromNetwork
                 .map(NewsResource::id)
-                .partition { it.chars().sum() % 2 == 0 }
+                .partition { it.value.chars().sum() % 2 == 0 }
                 .first
                 .toSet()
 
             deletedItems.forEach {
                 network.editCollection(
                     collectionType = CollectionType.NewsResources,
-                    id = it,
+                    id = it.value,
                     isDelete = true,
                 )
             }
@@ -192,8 +194,9 @@ class OfflineFirstNewsRepositoryTest {
 
             // Assert that items marked deleted on the network have been deleted locally
             assertEquals(
-                expected = (newsResourcesFromNetwork.map(NewsResource::id) - deletedItems).sorted(),
-                actual = newsResourcesFromDb.map(NewsResource::id).sorted(),
+                expected = (newsResourcesFromNetwork.map(NewsResource::id) - deletedItems)
+                    .map(NewsResourceId::value).sorted(),
+                actual = newsResourcesFromDb.map { it.id.value }.sorted(),
             )
 
             // After sync version should be updated
@@ -230,15 +233,15 @@ class OfflineFirstNewsRepositoryTest {
             val newsResourcesFromNetwork = network.getNewsResources()
                 .map(NetworkNewsResource::asEntity)
                 .map(NewsResourceEntity::asExternalModel)
-                .filter { it.id in changeListIds }
+                .filter { it.id.value in changeListIds }
 
             val newsResourcesFromDb = newsResourceDao.getNewsResources()
                 .first()
                 .map(PopulatedNewsResource::asExternalModel)
 
             assertEquals(
-                expected = newsResourcesFromNetwork.map(NewsResource::id).sorted(),
-                actual = newsResourcesFromDb.map(NewsResource::id).sorted(),
+                expected = newsResourcesFromNetwork.map { it.id.value }.sorted(),
+                actual = newsResourcesFromDb.map { it.id.value }.sorted(),
             )
 
             // After sync version should be updated
@@ -290,7 +293,7 @@ class OfflineFirstNewsRepositoryTest {
             subject.syncWith(synchronizer)
 
             assertEquals(
-                network.getNewsResources().map { it.id }.toSet(),
+                network.getNewsResources().map { NewsResourceId(it.id) }.toSet(),
                 niaPreferencesDataSource.userData.first().viewedNewsResources,
             )
         }
@@ -324,7 +327,7 @@ class OfflineFirstNewsRepositoryTest {
                 .flatMap(NetworkNewsResource::topicEntityShells)
                 .mapNotNull { topic ->
                     when (topic.id.chars().sum() % 2) {
-                        0 -> topic.id
+                        0 -> TopicId(topic.id)
                         else -> null
                     }
                 }
@@ -335,8 +338,9 @@ class OfflineFirstNewsRepositoryTest {
 
             subject.syncWith(synchronizer)
 
+            val followedTopicIdValues = followedTopicIds.mapTo(mutableSetOf(), TopicId::value)
             val followedNewsResourceIdsFromNetwork = networkNewsResources
-                .filter { (it.topics intersect followedTopicIds).isNotEmpty() }
+                .filter { (it.topics intersect followedTopicIdValues).isNotEmpty() }
                 .map(NetworkNewsResource::id)
                 .sorted()
 
@@ -344,7 +348,7 @@ class OfflineFirstNewsRepositoryTest {
             // that the user follows
             assertEquals(
                 expected = followedNewsResourceIdsFromNetwork,
-                actual = notifier.addedNewsResources.first().map(NewsResource::id).sorted(),
+                actual = notifier.addedNewsResources.first().map { it.id.value }.sorted(),
             )
         }
 

@@ -17,7 +17,9 @@
 package com.google.samples.apps.nowinandroid.core.domain.repository
 
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import kotlinx.coroutines.flow.Flow
 
@@ -31,22 +33,22 @@ interface UserDataRepository {
     /**
      * Sets the user's currently followed topics
      */
-    suspend fun setFollowedTopicIds(followedTopicIds: Set<String>)
+    suspend fun setFollowedTopicIds(followedTopicIds: Set<TopicId>)
 
     /**
      * Sets the user's newly followed/unfollowed topic
      */
-    suspend fun setTopicIdFollowed(followedTopicId: String, followed: Boolean)
+    suspend fun setTopicIdFollowed(followedTopicId: TopicId, followed: Boolean)
 
     /**
      * Updates the bookmarked status for a news resource
      */
-    suspend fun setNewsResourceBookmarked(newsResourceId: String, bookmarked: Boolean)
+    suspend fun setNewsResourceBookmarked(newsResourceId: NewsResourceId, bookmarked: Boolean)
 
     /**
      * Updates the viewed status for a news resource
      */
-    suspend fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean)
+    suspend fun setNewsResourceViewed(newsResourceId: NewsResourceId, viewed: Boolean)
 
     /**
      * Sets the desired theme brand.

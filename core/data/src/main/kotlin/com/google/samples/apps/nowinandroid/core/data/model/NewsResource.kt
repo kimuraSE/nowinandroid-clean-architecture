@@ -20,6 +20,7 @@ import com.google.samples.apps.nowinandroid.core.database.model.NewsResourceEnti
 import com.google.samples.apps.nowinandroid.core.database.model.NewsResourceTopicCrossRef
 import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkNewsResource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkTopic
 import com.google.samples.apps.nowinandroid.core.network.model.asExternalModel
@@ -60,7 +61,7 @@ fun NetworkNewsResource.topicCrossReferences(): List<NewsResourceTopicCrossRef> 
 
 fun NetworkNewsResource.asExternalModel(topics: List<NetworkTopic>) =
     NewsResource(
-        id = id,
+        id = NewsResourceId(id),
         title = title,
         content = content,
         url = url,

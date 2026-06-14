@@ -19,7 +19,9 @@ package com.google.samples.apps.nowinandroid.feature.topic.impl
 import com.google.samples.apps.nowinandroid.core.data.repository.CompositeUserNewsResourceRepository
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestNewsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestTopicsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
@@ -61,13 +63,13 @@ class TopicViewModelTest {
             userDataRepository = userDataRepository,
             topicsRepository = topicsRepository,
             userNewsResourceRepository = userNewsResourceRepository,
-            topicId = testInputTopics[0].topic.id,
+            topicId = testInputTopics[0].topic.id.value,
         )
     }
 
     @Test
     fun topicId_matchesTopicIdFromSavedStateHandle() =
-        assertEquals(testInputTopics[0].topic.id, viewModel.topicId)
+        assertEquals(testInputTopics[0].topic.id.value, viewModel.topicId)
 
     @Test
     fun uiStateTopic_whenSuccess_matchesTopicFromRepository() = runTest {
@@ -165,7 +167,7 @@ private const val TOPIC_IMAGE_URL = "Image URL"
 private val testInputTopics = listOf(
     FollowableTopic(
         Topic(
-            id = "0",
+            id = TopicId("0"),
             name = TOPIC_1_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -176,7 +178,7 @@ private val testInputTopics = listOf(
     ),
     FollowableTopic(
         Topic(
-            id = "1",
+            id = TopicId("1"),
             name = TOPIC_2_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -187,7 +189,7 @@ private val testInputTopics = listOf(
     ),
     FollowableTopic(
         Topic(
-            id = "2",
+            id = TopicId("2"),
             name = TOPIC_3_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -201,7 +203,7 @@ private val testInputTopics = listOf(
 private val testOutputTopics = listOf(
     FollowableTopic(
         Topic(
-            id = "0",
+            id = TopicId("0"),
             name = TOPIC_1_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -212,7 +214,7 @@ private val testOutputTopics = listOf(
     ),
     FollowableTopic(
         Topic(
-            id = "1",
+            id = TopicId("1"),
             name = TOPIC_2_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -223,7 +225,7 @@ private val testOutputTopics = listOf(
     ),
     FollowableTopic(
         Topic(
-            id = "2",
+            id = TopicId("2"),
             name = TOPIC_3_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -236,7 +238,7 @@ private val testOutputTopics = listOf(
 
 private val sampleNewsResources = listOf(
     NewsResource(
-        id = "1",
+        id = NewsResourceId("1"),
         title = "Thanks for helping us reach 1M YouTube Subscribers",
         content = "Thank you everyone for following the Now in Android series and everything the " +
             "Android Developers YouTube channel has to offer. During the Android Developer " +
@@ -248,7 +250,7 @@ private val sampleNewsResources = listOf(
         type = "Video 📺",
         topics = listOf(
             Topic(
-                id = "0",
+                id = TopicId("0"),
                 name = "Headlines",
                 shortDescription = "",
                 longDescription = "long description",

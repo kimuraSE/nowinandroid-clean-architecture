@@ -17,6 +17,7 @@
 package com.google.samples.apps.nowinandroid.core.domain.repository
 
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -32,5 +33,5 @@ interface TopicsRepository {
     /**
      * Gets data for a specific topic
      */
-    fun getTopic(id: String): Flow<Topic>
+    fun getTopic(id: TopicId): Flow<Topic>
 }

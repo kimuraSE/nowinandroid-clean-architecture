@@ -271,7 +271,7 @@ class NavigationTest {
             onNodeWithText(topic.name).performClick()
 
             // Verify the topic is still shown
-            onNodeWithTag("topic:${topic.id}").assertIsDisplayed()
+            onNodeWithTag("topic:${topic.id.value}").assertIsDisplayed()
 
             // Switch tab
             onNodeWithText(forYou).performClick()
@@ -279,7 +279,7 @@ class NavigationTest {
             onNodeWithText(interests).performClick()
 
             // Verify the topic is still shown
-            onNodeWithTag("topic:${topic.id}").assertExists()
+            onNodeWithTag("topic:${topic.id.value}").assertExists()
         }
     }
 
@@ -319,7 +319,7 @@ class NavigationTest {
                 .performClick()
 
             // Verify that we're on the correct topic details screen
-            onNodeWithTag("topic:${topic.id}").assertExists()
+            onNodeWithTag("topic:${topic.id.value}").assertExists()
         }
     }
 }

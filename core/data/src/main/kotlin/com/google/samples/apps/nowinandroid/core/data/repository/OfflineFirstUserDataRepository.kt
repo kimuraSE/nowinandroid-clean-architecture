@@ -21,7 +21,9 @@ import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsHelper
 import com.google.samples.apps.nowinandroid.core.datastore.NiaPreferencesDataSource
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -35,23 +37,23 @@ internal class OfflineFirstUserDataRepository @Inject constructor(
         niaPreferencesDataSource.userData
 
     @VisibleForTesting
-    override suspend fun setFollowedTopicIds(followedTopicIds: Set<String>) =
+    override suspend fun setFollowedTopicIds(followedTopicIds: Set<TopicId>) =
         niaPreferencesDataSource.setFollowedTopicIds(followedTopicIds)
 
-    override suspend fun setTopicIdFollowed(followedTopicId: String, followed: Boolean) {
+    override suspend fun setTopicIdFollowed(followedTopicId: TopicId, followed: Boolean) {
         niaPreferencesDataSource.setTopicIdFollowed(followedTopicId, followed)
-        analyticsHelper.logTopicFollowToggled(followedTopicId, followed)
+        analyticsHelper.logTopicFollowToggled(followedTopicId.value, followed)
     }
 
-    override suspend fun setNewsResourceBookmarked(newsResourceId: String, bookmarked: Boolean) {
+    override suspend fun setNewsResourceBookmarked(newsResourceId: NewsResourceId, bookmarked: Boolean) {
         niaPreferencesDataSource.setNewsResourceBookmarked(newsResourceId, bookmarked)
         analyticsHelper.logNewsResourceBookmarkToggled(
-            newsResourceId = newsResourceId,
+            newsResourceId = newsResourceId.value,
             isBookmarked = bookmarked,
         )
     }
 
-    override suspend fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) =
+    override suspend fun setNewsResourceViewed(newsResourceId: NewsResourceId, viewed: Boolean) =
         niaPreferencesDataSource.setNewsResourceViewed(newsResourceId, viewed)
 
     override suspend fun setThemeBrand(themeBrand: ThemeBrand) {

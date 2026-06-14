@@ -20,6 +20,7 @@ import com.google.samples.apps.nowinandroid.core.data.Syncable
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
 import com.google.samples.apps.nowinandroid.core.domain.repository.TopicsRepository
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,7 +35,7 @@ class TestTopicsRepository : TopicsRepository, Syncable {
 
     override fun getTopics(): Flow<List<Topic>> = topicsFlow
 
-    override fun getTopic(id: String): Flow<Topic> =
+    override fun getTopic(id: TopicId): Flow<Topic> =
         topicsFlow.map { topics -> topics.find { it.id == id }!! }
 
     /**

@@ -19,7 +19,9 @@ package com.google.samples.apps.nowinandroid.core.data
 import com.google.samples.apps.nowinandroid.core.data.repository.CompositeUserNewsResourceRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.mapToUserNewsResources
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestNewsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
@@ -135,7 +137,7 @@ class CompositeUserNewsResourceRepositoryTest {
 }
 
 private val sampleTopic1 = Topic(
-    id = "Topic1",
+    id = TopicId("Topic1"),
     name = "Headlines",
     shortDescription = "",
     longDescription = "long description",
@@ -144,7 +146,7 @@ private val sampleTopic1 = Topic(
 )
 
 private val sampleTopic2 = Topic(
-    id = "Topic2",
+    id = TopicId("Topic2"),
     name = "UI",
     shortDescription = "",
     longDescription = "long description",
@@ -154,7 +156,7 @@ private val sampleTopic2 = Topic(
 
 private val sampleNewsResources = listOf(
     NewsResource(
-        id = "1",
+        id = NewsResourceId("1"),
         title = "Thanks for helping us reach 1M YouTube Subscribers",
         content = "Thank you everyone for following the Now in Android series and everything the " +
             "Android Developers YouTube channel has to offer. During the Android Developer " +
@@ -167,7 +169,7 @@ private val sampleNewsResources = listOf(
         topics = listOf(sampleTopic1),
     ),
     NewsResource(
-        id = "2",
+        id = NewsResourceId("2"),
         title = "Transformations and customisations in the Paging Library",
         content = "A demonstration of different operations that can be performed with Paging. " +
             "Transformations like inserting separators, when to create a new pager, and " +
@@ -179,7 +181,7 @@ private val sampleNewsResources = listOf(
         topics = listOf(sampleTopic1, sampleTopic2),
     ),
     NewsResource(
-        id = "3",
+        id = NewsResourceId("3"),
         title = "Community tip on Paging",
         content = "Tips for using the Paging library from the developer community",
         url = "https://youtu.be/r5JgIyS3t3s",

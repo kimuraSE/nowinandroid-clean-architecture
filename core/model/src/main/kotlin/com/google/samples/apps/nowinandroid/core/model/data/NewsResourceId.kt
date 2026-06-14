@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,9 @@
 
 package com.google.samples.apps.nowinandroid.core.model.data
 
-import kotlinx.datetime.Instant
-
 /**
- * External data layer representation of a fully populated NiA news resource
+ * [NewsResource] の識別子を表す Value Object。
+ * ID の取り違え（例: TopicId を渡す）をコンパイル時に防ぐ。
  */
-data class NewsResource(
-    val id: NewsResourceId,
-    val title: String,
-    val content: String,
-    val url: String,
-    val headerImageUrl: String?,
-    val publishDate: Instant,
-    val type: String,
-    val topics: List<Topic>,
-)
+@JvmInline
+value class NewsResourceId(val value: String)

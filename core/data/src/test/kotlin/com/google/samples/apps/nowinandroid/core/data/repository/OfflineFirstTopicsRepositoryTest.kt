@@ -141,14 +141,14 @@ class OfflineFirstTopicsRepositoryTest {
             // Delete half of the items on the network
             val deletedItems = networkTopics
                 .map(Topic::id)
-                .partition { it.chars().sum() % 2 == 0 }
+                .partition { it.value.chars().sum() % 2 == 0 }
                 .first
                 .toSet()
 
             deletedItems.forEach {
                 network.editCollection(
                     collectionType = CollectionType.Topics,
-                    id = it,
+                    id = it.value,
                     isDelete = true,
                 )
             }

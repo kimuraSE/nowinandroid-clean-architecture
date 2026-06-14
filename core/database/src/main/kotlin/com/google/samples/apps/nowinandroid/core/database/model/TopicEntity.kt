@@ -20,6 +20,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 
 /**
  * Defines a topic a user may follow.
@@ -42,7 +43,7 @@ data class TopicEntity(
 )
 
 fun TopicEntity.asExternalModel() = Topic(
-    id = id,
+    id = TopicId(id),
     name = name,
     shortDescription = shortDescription,
     longDescription = longDescription,

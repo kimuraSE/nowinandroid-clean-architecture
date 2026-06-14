@@ -19,7 +19,9 @@ package com.google.samples.apps.nowinandroid.core.datastore
 import android.util.Log
 import androidx.datastore.core.DataStore
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -32,9 +34,12 @@ class NiaPreferencesDataSource @Inject constructor(
     val userData = userPreferences.data
         .map {
             UserData(
-                bookmarkedNewsResources = it.bookmarkedNewsResourceIdsMap.keys,
-                viewedNewsResources = it.viewedNewsResourceIdsMap.keys,
-                followedTopics = it.followedTopicIdsMap.keys,
+                bookmarkedNewsResources = it.bookmarkedNewsResourceIdsMap.keys
+                    .map(::NewsResourceId).toSet(),
+                viewedNewsResources = it.viewedNewsResourceIdsMap.keys
+                    .map(::NewsResourceId).toSet(),
+                followedTopics = it.followedTopicIdsMap.keys
+                    .map(::TopicId).toSet(),
                 themeBrand = when (it.themeBrand) {
                     null,
                     ThemeBrandProto.THEME_BRAND_UNSPECIFIED,
@@ -59,12 +64,12 @@ class NiaPreferencesDataSource @Inject constructor(
             )
         }
 
-    suspend fun setFollowedTopicIds(topicIds: Set<String>) {
+    suspend fun setFollowedTopicIds(topicIds: Set<TopicId>) {
         try {
             userPreferences.updateData {
                 it.copy {
                     followedTopicIds.clear()
-                    followedTopicIds.putAll(topicIds.associateWith { true })
+                    followedTopicIds.putAll(topicIds.associate { it.value to true })
                     updateShouldHideOnboardingIfNecessary()
                 }
             }
@@ -73,14 +78,14 @@ class NiaPreferencesDataSource @Inject constructor(
         }
     }
 
-    suspend fun setTopicIdFollowed(topicId: String, followed: Boolean) {
+    suspend fun setTopicIdFollowed(topicId: TopicId, followed: Boolean) {
         try {
             userPreferences.updateData {
                 it.copy {
                     if (followed) {
-                        followedTopicIds.put(topicId, true)
+                        followedTopicIds.put(topicId.value, true)
                     } else {
-                        followedTopicIds.remove(topicId)
+                        followedTopicIds.remove(topicId.value)
                     }
                     updateShouldHideOnboardingIfNecessary()
                 }
@@ -120,14 +125,14 @@ class NiaPreferencesDataSource @Inject constructor(
         }
     }
 
-    suspend fun setNewsResourceBookmarked(newsResourceId: String, bookmarked: Boolean) {
+    suspend fun setNewsResourceBookmarked(newsResourceId: NewsResourceId, bookmarked: Boolean) {
         try {
             userPreferences.updateData {
                 it.copy {
                     if (bookmarked) {
-                        bookmarkedNewsResourceIds.put(newsResourceId, true)
+                        bookmarkedNewsResourceIds.put(newsResourceId.value, true)
                     } else {
-                        bookmarkedNewsResourceIds.remove(newsResourceId)
+                        bookmarkedNewsResourceIds.remove(newsResourceId.value)
                     }
                 }
             }
@@ -136,18 +141,18 @@ class NiaPreferencesDataSource @Inject constructor(
         }
     }
 
-    suspend fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) {
+    suspend fun setNewsResourceViewed(newsResourceId: NewsResourceId, viewed: Boolean) {
         setNewsResourcesViewed(listOf(newsResourceId), viewed)
     }
 
-    suspend fun setNewsResourcesViewed(newsResourceIds: List<String>, viewed: Boolean) {
+    suspend fun setNewsResourcesViewed(newsResourceIds: List<NewsResourceId>, viewed: Boolean) {
         userPreferences.updateData { prefs ->
             prefs.copy {
                 newsResourceIds.forEach { id ->
                     if (viewed) {
-                        viewedNewsResourceIds.put(id, true)
+                        viewedNewsResourceIds.put(id.value, true)
                     } else {
-                        viewedNewsResourceIds.remove(id)
+                        viewedNewsResourceIds.remove(id.value)
                     }
                 }
             }

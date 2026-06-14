@@ -317,7 +317,7 @@ fun NewsResourceTopics(
         for (followableTopic in topics) {
             NiaTopicTag(
                 followed = followableTopic.isFollowed,
-                onClick = { onTopicClick(followableTopic.topic.id) },
+                onClick = { onTopicClick(followableTopic.topic.id.value) },
                 text = {
                     val contentDescription = if (followableTopic.isFollowed) {
                         stringResource(

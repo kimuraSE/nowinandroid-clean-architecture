@@ -21,6 +21,7 @@ import androidx.navigation.testing.invoke
 import com.google.samples.apps.nowinandroid.core.domain.GetFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestTopicsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
 import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
@@ -68,11 +69,11 @@ class InterestsViewModelTest {
     fun setup() {
         viewModel = InterestsViewModel(
             savedStateHandle = SavedStateHandle(
-                route = InterestsNavKey(initialTopicId = testInputTopics[0].topic.id),
+                route = InterestsNavKey(initialTopicId = testInputTopics[0].topic.id.value),
             ),
             userDataRepository = userDataRepository,
             getFollowableTopics = getFollowableTopicsUseCase,
-            InterestsNavKey(initialTopicId = testInputTopics[0].topic.id),
+            InterestsNavKey(initialTopicId = testInputTopics[0].topic.id.value),
         )
     }
 
@@ -104,14 +105,14 @@ class InterestsViewModelTest {
         )
 
         viewModel.followTopic(
-            followedTopicId = toggleTopicId,
+            followedTopicId = toggleTopicId.value,
             true,
         )
 
         assertEquals(
             InterestsUiState.Interests(
                 topics = testOutputTopics,
-                selectedTopicId = testInputTopics[0].topic.id,
+                selectedTopicId = testInputTopics[0].topic.id.value,
             ),
             viewModel.uiState.value,
         )
@@ -135,14 +136,14 @@ class InterestsViewModelTest {
         )
 
         viewModel.followTopic(
-            followedTopicId = toggleTopicId,
+            followedTopicId = toggleTopicId.value,
             false,
         )
 
         assertEquals(
             InterestsUiState.Interests(
                 topics = testInputTopics,
-                selectedTopicId = testInputTopics[0].topic.id,
+                selectedTopicId = testInputTopics[0].topic.id.value,
             ),
             viewModel.uiState.value,
         )
@@ -160,7 +161,7 @@ private const val TOPIC_IMAGE_URL = "Image URL"
 private val testInputTopics = listOf(
     FollowableTopic(
         Topic(
-            id = "0",
+            id = TopicId("0"),
             name = TOPIC_1_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -171,7 +172,7 @@ private val testInputTopics = listOf(
     ),
     FollowableTopic(
         Topic(
-            id = "1",
+            id = TopicId("1"),
             name = TOPIC_2_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -182,7 +183,7 @@ private val testInputTopics = listOf(
     ),
     FollowableTopic(
         Topic(
-            id = "2",
+            id = TopicId("2"),
             name = TOPIC_3_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -196,7 +197,7 @@ private val testInputTopics = listOf(
 private val testOutputTopics = listOf(
     FollowableTopic(
         Topic(
-            id = "0",
+            id = TopicId("0"),
             name = TOPIC_1_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -207,7 +208,7 @@ private val testOutputTopics = listOf(
     ),
     FollowableTopic(
         Topic(
-            id = "1",
+            id = TopicId("1"),
             name = TOPIC_2_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,
@@ -218,7 +219,7 @@ private val testOutputTopics = listOf(
     ),
     FollowableTopic(
         Topic(
-            id = "2",
+            id = TopicId("2"),
             name = TOPIC_3_NAME,
             shortDescription = TOPIC_SHORT_DESC,
             longDescription = TOPIC_LONG_DESC,

@@ -56,7 +56,7 @@ fun LazyStaggeredGridScope.newsFeed(
         is NewsFeedUiState.Success -> {
             items(
                 items = feedState.feed,
-                key = { it.id },
+                key = { it.id.value },
                 contentType = { "newsFeedItem" },
             ) { userNewsResource ->
                 val context = LocalContext.current
@@ -69,16 +69,16 @@ fun LazyStaggeredGridScope.newsFeed(
                     onClick = {
                         onExpandedCardClick()
                         analyticsHelper.logNewsResourceOpened(
-                            newsResourceId = userNewsResource.id,
+                            newsResourceId = userNewsResource.id.value,
                         )
                         launchCustomChromeTab(context, Uri.parse(userNewsResource.url), backgroundColor)
 
-                        onNewsResourceViewed(userNewsResource.id)
+                        onNewsResourceViewed(userNewsResource.id.value)
                     },
                     hasBeenViewed = userNewsResource.hasBeenViewed,
                     onToggleBookmark = {
                         onNewsResourcesCheckedChanged(
-                            userNewsResource.id,
+                            userNewsResource.id.value,
                             !userNewsResource.isSaved,
                         )
                     },

@@ -352,11 +352,11 @@ private fun TopicSelection(
         ) {
             items(
                 items = onboardingUiState.topics,
-                key = { it.topic.id },
+                key = { it.topic.id.value },
             ) {
                 SingleTopicButton(
                     name = it.topic.name,
-                    topicId = it.topic.id,
+                    topicId = it.topic.id.value,
                     imageUrl = it.topic.imageUrl,
                     isSelected = it.isFollowed,
                     onClick = onTopicCheckedChanged,
@@ -472,7 +472,7 @@ private fun DeepLinkEffect(
 
     LaunchedEffect(userNewsResource) {
         if (userNewsResource == null) return@LaunchedEffect
-        if (!userNewsResource.hasBeenViewed) onDeepLinkOpened(userNewsResource.id)
+        if (!userNewsResource.hasBeenViewed) onDeepLinkOpened(userNewsResource.id.value)
 
         launchCustomChromeTab(
             context = context,

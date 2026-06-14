@@ -321,7 +321,7 @@ private fun SearchResultBody(
                     )
                 }
                 topics.forEach { followableTopic ->
-                    val topicId = followableTopic.topic.id
+                    val topicId = followableTopic.topic.id.value
                     item(
                         // Append a prefix to distinguish a key for news resources
                         key = "topic-$topicId",

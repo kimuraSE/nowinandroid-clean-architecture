@@ -23,7 +23,9 @@ import com.google.samples.apps.nowinandroid.core.data.repository.CompositeUserNe
 import com.google.samples.apps.nowinandroid.core.domain.GetFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import com.google.samples.apps.nowinandroid.core.model.data.mapToUserNewsResources
 import com.google.samples.apps.nowinandroid.core.notifications.DEEP_LINK_NEWS_RESOURCE_ID_KEY
@@ -149,7 +151,7 @@ class ForYouViewModelTest {
                 topics = listOf(
                     FollowableTopic(
                         topic = Topic(
-                            id = "0",
+                            id = TopicId("0"),
                             name = "Headlines",
                             shortDescription = "",
                             longDescription = "long description",
@@ -160,7 +162,7 @@ class ForYouViewModelTest {
                     ),
                     FollowableTopic(
                         topic = Topic(
-                            id = "1",
+                            id = TopicId("1"),
                             name = "UI",
                             shortDescription = "",
                             longDescription = "long description",
@@ -171,7 +173,7 @@ class ForYouViewModelTest {
                     ),
                     FollowableTopic(
                         topic = Topic(
-                            id = "2",
+                            id = TopicId("2"),
                             name = "Tools",
                             shortDescription = "",
                             longDescription = "long description",
@@ -206,7 +208,7 @@ class ForYouViewModelTest {
                 topics = listOf(
                     FollowableTopic(
                         topic = Topic(
-                            id = "0",
+                            id = TopicId("0"),
                             name = "Headlines",
                             shortDescription = "",
                             longDescription = "long description",
@@ -217,7 +219,7 @@ class ForYouViewModelTest {
                     ),
                     FollowableTopic(
                         topic = Topic(
-                            id = "1",
+                            id = TopicId("1"),
                             name = "UI",
                             shortDescription = "",
                             longDescription = "long description",
@@ -228,7 +230,7 @@ class ForYouViewModelTest {
                     ),
                     FollowableTopic(
                         topic = Topic(
-                            id = "2",
+                            id = TopicId("2"),
                             name = "Tools",
                             shortDescription = "",
                             longDescription = "long description",
@@ -256,7 +258,7 @@ class ForYouViewModelTest {
 
         topicsRepository.sendTopics(sampleTopics)
 
-        val followedTopicIds = setOf("0", "1")
+        val followedTopicIds = setOf(TopicId("0"), TopicId("1"))
         val userData = emptyUserData.copy(followedTopics = followedTopicIds)
         userDataRepository.setUserData(userData)
         viewModel.dismissOnboarding()
@@ -306,7 +308,7 @@ class ForYouViewModelTest {
         )
 
         val followedTopicId = sampleTopics[1].id
-        viewModel.updateTopicSelection(followedTopicId, isChecked = true)
+        viewModel.updateTopicSelection(followedTopicId.value, isChecked = true)
 
         assertEquals(
             OnboardingUiState.Shown(
@@ -347,7 +349,7 @@ class ForYouViewModelTest {
                 topics = listOf(
                     FollowableTopic(
                         topic = Topic(
-                            id = "0",
+                            id = TopicId("0"),
                             name = "Headlines",
                             shortDescription = "",
                             longDescription = "long description",
@@ -358,7 +360,7 @@ class ForYouViewModelTest {
                     ),
                     FollowableTopic(
                         topic = Topic(
-                            id = "1",
+                            id = TopicId("1"),
                             name = "UI",
                             shortDescription = "",
                             longDescription = "long description",
@@ -369,7 +371,7 @@ class ForYouViewModelTest {
                     ),
                     FollowableTopic(
                         topic = Topic(
-                            id = "2",
+                            id = TopicId("2"),
                             name = "Tools",
                             shortDescription = "",
                             longDescription = "long description",
@@ -395,7 +397,7 @@ class ForYouViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.onboardingUiState.collect() }
         backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.feedState.collect() }
 
-        val followedTopicIds = setOf("1")
+        val followedTopicIds = setOf(TopicId("1"))
         val userData = emptyUserData.copy(
             followedTopics = followedTopicIds,
             shouldHideOnboarding = true,
@@ -412,7 +414,7 @@ class ForYouViewModelTest {
         )
 
         val userDataExpected = userData.copy(
-            bookmarkedNewsResources = setOf(bookmarkedNewsResourceId),
+            bookmarkedNewsResources = setOf(NewsResourceId(bookmarkedNewsResourceId)),
         )
 
         assertEquals(
@@ -436,7 +438,7 @@ class ForYouViewModelTest {
 
         newsRepository.sendNewsResources(sampleNewsResources)
         userDataRepository.setUserData(emptyUserData)
-        savedStateHandle[DEEP_LINK_NEWS_RESOURCE_ID_KEY] = sampleNewsResources.first().id
+        savedStateHandle[DEEP_LINK_NEWS_RESOURCE_ID_KEY] = sampleNewsResources.first().id.value
 
         assertEquals(
             expected = UserNewsResource(
@@ -447,7 +449,7 @@ class ForYouViewModelTest {
         )
 
         viewModel.onDeepLinkOpened(
-            newsResourceId = sampleNewsResources.first().id,
+            newsResourceId = sampleNewsResources.first().id.value,
         )
 
         assertNull(
@@ -461,7 +463,7 @@ class ForYouViewModelTest {
                     extras = listOf(
                         Param(
                             key = DEEP_LINK_NEWS_RESOURCE_ID_KEY,
-                            value = sampleNewsResources.first().id,
+                            value = sampleNewsResources.first().id.value,
                         ),
                     ),
                 ),
@@ -475,7 +477,7 @@ class ForYouViewModelTest {
         viewModel.updateNewsResourceSaved(newsResourceId, true)
 
         assertEquals(
-            expected = setOf(newsResourceId),
+            expected = setOf(NewsResourceId(newsResourceId)),
             actual = userDataRepository.userData.first().bookmarkedNewsResources,
         )
 
@@ -490,7 +492,7 @@ class ForYouViewModelTest {
 
 private val sampleTopics = listOf(
     Topic(
-        id = "0",
+        id = TopicId("0"),
         name = "Headlines",
         shortDescription = "",
         longDescription = "long description",
@@ -498,7 +500,7 @@ private val sampleTopics = listOf(
         imageUrl = "image URL",
     ),
     Topic(
-        id = "1",
+        id = TopicId("1"),
         name = "UI",
         shortDescription = "",
         longDescription = "long description",
@@ -506,7 +508,7 @@ private val sampleTopics = listOf(
         imageUrl = "image URL",
     ),
     Topic(
-        id = "2",
+        id = TopicId("2"),
         name = "Tools",
         shortDescription = "",
         longDescription = "long description",
@@ -517,7 +519,7 @@ private val sampleTopics = listOf(
 
 private val sampleNewsResources = listOf(
     NewsResource(
-        id = "1",
+        id = NewsResourceId("1"),
         title = "Thanks for helping us reach 1M YouTube Subscribers",
         content = "Thank you everyone for following the Now in Android series and everything the " +
             "Android Developers YouTube channel has to offer. During the Android Developer " +
@@ -529,7 +531,7 @@ private val sampleNewsResources = listOf(
         type = "Video 📺",
         topics = listOf(
             Topic(
-                id = "0",
+                id = TopicId("0"),
                 name = "Headlines",
                 shortDescription = "",
                 longDescription = "long description",
@@ -539,7 +541,7 @@ private val sampleNewsResources = listOf(
         ),
     ),
     NewsResource(
-        id = "2",
+        id = NewsResourceId("2"),
         title = "Transformations and customisations in the Paging Library",
         content = "A demonstration of different operations that can be performed with Paging. " +
             "Transformations like inserting separators, when to create a new pager, and " +
@@ -550,7 +552,7 @@ private val sampleNewsResources = listOf(
         type = "Video 📺",
         topics = listOf(
             Topic(
-                id = "1",
+                id = TopicId("1"),
                 name = "UI",
                 shortDescription = "",
                 longDescription = "long description",
@@ -560,7 +562,7 @@ private val sampleNewsResources = listOf(
         ),
     ),
     NewsResource(
-        id = "3",
+        id = NewsResourceId("3"),
         title = "Community tip on Paging",
         content = "Tips for using the Paging library from the developer community",
         url = "https://youtu.be/r5JgIyS3t3s",
@@ -569,7 +571,7 @@ private val sampleNewsResources = listOf(
         type = "Video 📺",
         topics = listOf(
             Topic(
-                id = "1",
+                id = TopicId("1"),
                 name = "UI",
                 shortDescription = "",
                 longDescription = "long description",

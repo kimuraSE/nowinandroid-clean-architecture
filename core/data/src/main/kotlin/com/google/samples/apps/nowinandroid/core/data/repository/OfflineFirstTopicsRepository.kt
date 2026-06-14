@@ -26,6 +26,7 @@ import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
 import com.google.samples.apps.nowinandroid.core.datastore.ChangeListVersions
 import com.google.samples.apps.nowinandroid.core.domain.repository.TopicsRepository
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.network.NiaNetworkDataSource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkTopic
 import kotlinx.coroutines.flow.Flow
@@ -45,8 +46,8 @@ class OfflineFirstTopicsRepository @Inject constructor(
         topicDao.getTopicEntities()
             .map { it.map(TopicEntity::asExternalModel) }
 
-    override fun getTopic(id: String): Flow<Topic> =
-        topicDao.getTopicEntity(id).map { it.asExternalModel() }
+    override fun getTopic(id: TopicId): Flow<Topic> =
+        topicDao.getTopicEntity(id.value).map { it.asExternalModel() }
 
     override suspend fun syncWith(synchronizer: Synchronizer): Boolean =
         synchronizer.changeListSync(

@@ -18,7 +18,9 @@ package com.google.samples.apps.nowinandroid.core.testing.repository
 
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
 import kotlinx.coroutines.flow.Flow
@@ -45,11 +47,11 @@ class TestUserDataRepository : UserDataRepository {
 
     override val userData: Flow<UserData> = _userData.filterNotNull()
 
-    override suspend fun setFollowedTopicIds(followedTopicIds: Set<String>) {
+    override suspend fun setFollowedTopicIds(followedTopicIds: Set<TopicId>) {
         _userData.tryEmit(currentUserData.copy(followedTopics = followedTopicIds))
     }
 
-    override suspend fun setTopicIdFollowed(followedTopicId: String, followed: Boolean) {
+    override suspend fun setTopicIdFollowed(followedTopicId: TopicId, followed: Boolean) {
         currentUserData.let { current ->
             val followedTopics = if (followed) {
                 current.followedTopics + followedTopicId
@@ -61,7 +63,7 @@ class TestUserDataRepository : UserDataRepository {
         }
     }
 
-    override suspend fun setNewsResourceBookmarked(newsResourceId: String, bookmarked: Boolean) {
+    override suspend fun setNewsResourceBookmarked(newsResourceId: NewsResourceId, bookmarked: Boolean) {
         currentUserData.let { current ->
             val bookmarkedNews = if (bookmarked) {
                 current.bookmarkedNewsResources + newsResourceId
@@ -73,7 +75,7 @@ class TestUserDataRepository : UserDataRepository {
         }
     }
 
-    override suspend fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) {
+    override suspend fun setNewsResourceViewed(newsResourceId: NewsResourceId, viewed: Boolean) {
         currentUserData.let { current ->
             _userData.tryEmit(
                 current.copy(

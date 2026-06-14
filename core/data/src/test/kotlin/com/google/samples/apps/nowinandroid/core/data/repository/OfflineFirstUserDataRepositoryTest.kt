@@ -21,7 +21,9 @@ import com.google.samples.apps.nowinandroid.core.datastore.NiaPreferencesDataSou
 import com.google.samples.apps.nowinandroid.core.datastore.UserPreferences
 import com.google.samples.apps.nowinandroid.core.datastore.test.InMemoryDataStore
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -74,19 +76,19 @@ class OfflineFirstUserDataRepositoryTest {
     @Test
     fun offlineFirstUserDataRepository_toggle_followed_topics_logic_delegates_to_nia_preferences() =
         testScope.runTest {
-            subject.setTopicIdFollowed(followedTopicId = "0", followed = true)
+            subject.setTopicIdFollowed(followedTopicId = TopicId("0"), followed = true)
 
             assertEquals(
-                setOf("0"),
+                setOf(TopicId("0")),
                 subject.userData
                     .map { it.followedTopics }
                     .first(),
             )
 
-            subject.setTopicIdFollowed(followedTopicId = "1", followed = true)
+            subject.setTopicIdFollowed(followedTopicId = TopicId("1"), followed = true)
 
             assertEquals(
-                setOf("0", "1"),
+                setOf(TopicId("0"), TopicId("1")),
                 subject.userData
                     .map { it.followedTopics }
                     .first(),
@@ -105,10 +107,10 @@ class OfflineFirstUserDataRepositoryTest {
     @Test
     fun offlineFirstUserDataRepository_set_followed_topics_logic_delegates_to_nia_preferences() =
         testScope.runTest {
-            subject.setFollowedTopicIds(followedTopicIds = setOf("1", "2"))
+            subject.setFollowedTopicIds(followedTopicIds = setOf(TopicId("1"), TopicId("2")))
 
             assertEquals(
-                setOf("1", "2"),
+                setOf(TopicId("1"), TopicId("2")),
                 subject.userData
                     .map { it.followedTopics }
                     .first(),
@@ -127,19 +129,19 @@ class OfflineFirstUserDataRepositoryTest {
     @Test
     fun offlineFirstUserDataRepository_bookmark_news_resource_logic_delegates_to_nia_preferences() =
         testScope.runTest {
-            subject.setNewsResourceBookmarked(newsResourceId = "0", bookmarked = true)
+            subject.setNewsResourceBookmarked(newsResourceId = NewsResourceId("0"), bookmarked = true)
 
             assertEquals(
-                setOf("0"),
+                setOf(NewsResourceId("0")),
                 subject.userData
                     .map { it.bookmarkedNewsResources }
                     .first(),
             )
 
-            subject.setNewsResourceBookmarked(newsResourceId = "1", bookmarked = true)
+            subject.setNewsResourceBookmarked(newsResourceId = NewsResourceId("1"), bookmarked = true)
 
             assertEquals(
-                setOf("0", "1"),
+                setOf(NewsResourceId("0"), NewsResourceId("1")),
                 subject.userData
                     .map { it.bookmarkedNewsResources }
                     .first(),
@@ -158,19 +160,19 @@ class OfflineFirstUserDataRepositoryTest {
     @Test
     fun offlineFirstUserDataRepository_update_viewed_news_resources_delegates_to_nia_preferences() =
         runTest {
-            subject.setNewsResourceViewed(newsResourceId = "0", viewed = true)
+            subject.setNewsResourceViewed(newsResourceId = NewsResourceId("0"), viewed = true)
 
             assertEquals(
-                setOf("0"),
+                setOf(NewsResourceId("0")),
                 subject.userData
                     .map { it.viewedNewsResources }
                     .first(),
             )
 
-            subject.setNewsResourceViewed(newsResourceId = "1", viewed = true)
+            subject.setNewsResourceViewed(newsResourceId = NewsResourceId("1"), viewed = true)
 
             assertEquals(
-                setOf("0", "1"),
+                setOf(NewsResourceId("0"), NewsResourceId("1")),
                 subject.userData
                     .map { it.viewedNewsResources }
                     .first(),
@@ -249,7 +251,7 @@ class OfflineFirstUserDataRepositoryTest {
     @Test
     fun whenUserCompletesOnboarding_thenRemovesAllInterests_shouldHideOnboardingIsFalse() =
         testScope.runTest {
-            subject.setFollowedTopicIds(setOf("1"))
+            subject.setFollowedTopicIds(setOf(TopicId("1")))
             subject.setShouldHideOnboarding(true)
             assertTrue(subject.userData.first().shouldHideOnboarding)
 

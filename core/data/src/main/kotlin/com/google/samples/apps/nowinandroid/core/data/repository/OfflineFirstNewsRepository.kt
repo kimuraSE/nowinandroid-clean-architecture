@@ -32,6 +32,7 @@ import com.google.samples.apps.nowinandroid.core.datastore.NiaPreferencesDataSou
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.network.NiaNetworkDataSource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkNewsResource
 import com.google.samples.apps.nowinandroid.core.notifications.Notifier
@@ -60,9 +61,9 @@ class OfflineFirstNewsRepository @Inject constructor(
         query: NewsResourceQuery,
     ): Flow<List<NewsResource>> = newsResourceDao.getNewsResources(
         useFilterTopicIds = query.filterTopicIds != null,
-        filterTopicIds = query.filterTopicIds ?: emptySet(),
+        filterTopicIds = query.filterTopicIds?.map { it.value }?.toSet() ?: emptySet(),
         useFilterNewsIds = query.filterNewsIds != null,
-        filterNewsIds = query.filterNewsIds ?: emptySet(),
+        filterNewsIds = query.filterNewsIds?.map { it.value }?.toSet() ?: emptySet(),
     )
         .map { it.map(PopulatedNewsResource::asExternalModel) }
 
@@ -86,7 +87,7 @@ class OfflineFirstNewsRepository @Inject constructor(
                 val existingNewsResourceIdsThatHaveChanged = when {
                     hasOnboarded -> newsResourceDao.getNewsResourceIds(
                         useFilterTopicIds = true,
-                        filterTopicIds = followedTopicIds,
+                        filterTopicIds = followedTopicIds.map { it.value }.toSet(),
                         useFilterNewsIds = true,
                         filterNewsIds = changedIds.toSet(),
                     )
@@ -99,7 +100,7 @@ class OfflineFirstNewsRepository @Inject constructor(
                 if (isFirstSync) {
                     // When we first retrieve news, mark everything viewed, so that we aren't
                     // overwhelmed with all historical news.
-                    niaPreferencesDataSource.setNewsResourcesViewed(changedIds, true)
+                    niaPreferencesDataSource.setNewsResourcesViewed(changedIds.map(::NewsResourceId), true)
                 }
 
                 // Obtain the news resources which have changed from the network and upsert them locally
@@ -130,7 +131,7 @@ class OfflineFirstNewsRepository @Inject constructor(
                 if (hasOnboarded) {
                     val addedNewsResources = newsResourceDao.getNewsResources(
                         useFilterTopicIds = true,
-                        filterTopicIds = followedTopicIds,
+                        filterTopicIds = followedTopicIds.map { it.value }.toSet(),
                         useFilterNewsIds = true,
                         filterNewsIds = changedIds.toSet() - existingNewsResourceIdsThatHaveChanged,
                     )

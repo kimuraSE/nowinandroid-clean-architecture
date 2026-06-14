@@ -17,6 +17,7 @@
 package com.google.samples.apps.nowinandroid.core.datastore
 
 import com.google.samples.apps.nowinandroid.core.datastore.test.InMemoryDataStore
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -52,11 +53,11 @@ class NiaPreferencesDataSourceTest {
     fun userShouldHideOnboarding_unfollowsLastTopic_shouldHideOnboardingIsFalse() =
         testScope.runTest {
             // Given: user completes onboarding by selecting a single topic.
-            subject.setTopicIdFollowed("1", true)
+            subject.setTopicIdFollowed(TopicId("1"), true)
             subject.setShouldHideOnboarding(true)
 
             // When: they unfollow that topic.
-            subject.setTopicIdFollowed("1", false)
+            subject.setTopicIdFollowed(TopicId("1"), false)
 
             // Then: onboarding should be shown again
             assertFalse(subject.userData.first().shouldHideOnboarding)
@@ -66,7 +67,7 @@ class NiaPreferencesDataSourceTest {
     fun userShouldHideOnboarding_unfollowsAllTopics_shouldHideOnboardingIsFalse() =
         testScope.runTest {
             // Given: user completes onboarding by selecting several topics.
-            subject.setFollowedTopicIds(setOf("1", "2"))
+            subject.setFollowedTopicIds(setOf(TopicId("1"), TopicId("2")))
             subject.setShouldHideOnboarding(true)
 
             // When: they unfollow those topics.

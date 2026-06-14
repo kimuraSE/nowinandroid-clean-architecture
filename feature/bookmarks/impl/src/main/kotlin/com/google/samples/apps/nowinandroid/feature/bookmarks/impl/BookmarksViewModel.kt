@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserNewsResourceRepository
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState
 import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState.Loading
@@ -58,20 +59,20 @@ class BookmarksViewModel @Inject constructor(
         viewModelScope.launch {
             shouldDisplayUndoBookmark = true
             lastRemovedBookmarkId = newsResourceId
-            userDataRepository.setNewsResourceBookmarked(newsResourceId, false)
+            userDataRepository.setNewsResourceBookmarked(NewsResourceId(newsResourceId), false)
         }
     }
 
     fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) {
         viewModelScope.launch {
-            userDataRepository.setNewsResourceViewed(newsResourceId, viewed)
+            userDataRepository.setNewsResourceViewed(NewsResourceId(newsResourceId), viewed)
         }
     }
 
     fun undoBookmarkRemoval() {
         viewModelScope.launch {
             lastRemovedBookmarkId?.let {
-                userDataRepository.setNewsResourceBookmarked(it, true)
+                userDataRepository.setNewsResourceBookmarked(NewsResourceId(it), true)
             }
         }
         clearUndoState()

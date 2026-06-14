@@ -84,7 +84,7 @@ class BookmarksViewModelTest {
         // Start with the resource saved
         userDataRepository.setNewsResourceBookmarked(newsResourcesTestData[0].id, true)
         // Use viewModel to remove saved resource
-        viewModel.removeFromSavedResources(newsResourcesTestData[0].id)
+        viewModel.removeFromSavedResources(newsResourcesTestData[0].id.value)
         // Verify list of saved resources is now empty
         val item = viewModel.feedUiState.value
         assertIs<Success>(item)
@@ -104,7 +104,7 @@ class BookmarksViewModelTest {
         assertFalse(itemBeforeViewed.feed.first().hasBeenViewed)
 
         // When
-        viewModel.setNewsResourceViewed(newsResourcesTestData[0].id, true)
+        viewModel.setNewsResourceViewed(newsResourcesTestData[0].id.value, true)
 
         // Then
         val item = viewModel.feedUiState.value
@@ -119,7 +119,7 @@ class BookmarksViewModelTest {
         // Given
         newsRepository.sendNewsResources(newsResourcesTestData)
         userDataRepository.setNewsResourceBookmarked(newsResourcesTestData[0].id, true)
-        viewModel.removeFromSavedResources(newsResourcesTestData[0].id)
+        viewModel.removeFromSavedResources(newsResourcesTestData[0].id.value)
         assertTrue(viewModel.shouldDisplayUndoBookmark)
         val itemBeforeUndo = viewModel.feedUiState.value
         assertIs<Success>(itemBeforeUndo)

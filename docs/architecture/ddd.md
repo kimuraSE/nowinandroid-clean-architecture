@@ -75,6 +75,14 @@ value class NewsResourceId(val value: String)
 - 既存の enum（`DarkThemeConfig`, `ThemeBrand`, `NewsResourceType`）も VO と位置づける
 - URL・日時・検索クエリ等の型化は行わない（バリデーション要件が存在せず過剰設計になるため）。バリデーションが必要になった時点で VO 化する
 
+### value class を使う際の境界の注意（重要）
+
+value class の ID は **ドメイン層・UseCase・ViewModel・UI のイベント**まで型のまま流すが、以下の「フレームワークが値を保存・復元する境界」では `String`（`.value`）に変換する。value class は `Bundle`/`Parcelable` に直接格納できず実行時例外になるため。
+
+- **Compose の `LazyColumn`/`LazyVerticalGrid` の `key`**: `key = { it.id.value }`（`key = { it.id }` は実行時に `IllegalArgumentException: Type of the key ... is not supported`）
+- **`SavedStateHandle` / ナビゲーション引数 / `rememberSaveable`**: `String` で保持する
+- **永続化（Room/DataStore/Proto）・ネットワーク DTO・analytics**: `String` を使い、マッパー（data 層）で `TopicId(value)` のように相互変換する（[clean-architecture.md](./clean-architecture.md) §6）
+
 ## 5. 集約（Aggregate）
 
 **定義: 整合性を保つ単位としてまとめて扱うオブジェクト群。集約ルートを通じてのみ変更する。**
