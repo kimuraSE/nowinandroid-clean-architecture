@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.samples.apps.nowinandroid.core.domain
+package com.google.samples.apps.nowinandroid.core.domain.usecase
 
-import com.google.samples.apps.nowinandroid.core.domain.TopicSortField.NAME
+import com.google.samples.apps.nowinandroid.core.domain.usecase.TopicSortField.NAME
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.model.data.TopicId
@@ -29,7 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class GetFollowableTopicsUseCaseTest {
+class ObserveFollowableTopicsUseCaseTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -37,7 +37,7 @@ class GetFollowableTopicsUseCaseTest {
     private val topicsRepository = TestTopicsRepository()
     private val userDataRepository = TestUserDataRepository()
 
-    val useCase = GetFollowableTopicsUseCase(
+    val useCase = ObserveFollowableTopicsUseCase(
         topicsRepository,
         userDataRepository,
     )

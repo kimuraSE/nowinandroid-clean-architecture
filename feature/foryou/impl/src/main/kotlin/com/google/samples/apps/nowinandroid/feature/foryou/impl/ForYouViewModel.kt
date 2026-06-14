@@ -22,10 +22,10 @@ import androidx.lifecycle.viewModelScope
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsEvent
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsEvent.Param
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsHelper
-import com.google.samples.apps.nowinandroid.core.domain.GetFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserNewsResourceRepository
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.core.domain.util.SyncManager
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.TopicId
@@ -50,7 +50,7 @@ class ForYouViewModel @Inject constructor(
     private val analyticsHelper: AnalyticsHelper,
     private val userDataRepository: UserDataRepository,
     userNewsResourceRepository: UserNewsResourceRepository,
-    getFollowableTopics: GetFollowableTopicsUseCase,
+    getFollowableTopics: ObserveFollowableTopicsUseCase,
 ) : ViewModel() {
 
     private val shouldShowOnboarding: Flow<Boolean> =

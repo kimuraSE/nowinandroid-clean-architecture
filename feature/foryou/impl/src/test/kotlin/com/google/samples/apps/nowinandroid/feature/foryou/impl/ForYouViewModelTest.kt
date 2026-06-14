@@ -20,7 +20,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsEvent
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsEvent.Param
 import com.google.samples.apps.nowinandroid.core.data.repository.CompositeUserNewsResourceRepository
-import com.google.samples.apps.nowinandroid.core.domain.GetFollowableTopicsUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
@@ -69,7 +69,7 @@ class ForYouViewModelTest {
         userDataRepository = userDataRepository,
     )
 
-    private val getFollowableTopicsUseCase = GetFollowableTopicsUseCase(
+    private val getFollowableTopicsUseCase = ObserveFollowableTopicsUseCase(
         topicsRepository = topicsRepository,
         userDataRepository = userDataRepository,
     )

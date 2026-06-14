@@ -22,11 +22,11 @@ import androidx.lifecycle.viewModelScope
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsEvent
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsEvent.Param
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsHelper
-import com.google.samples.apps.nowinandroid.core.domain.GetRecentSearchQueriesUseCase
-import com.google.samples.apps.nowinandroid.core.domain.GetSearchContentsUseCase
 import com.google.samples.apps.nowinandroid.core.domain.repository.RecentSearchRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.SearchContentsRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveRecentSearchQueriesUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveSearchResultsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserSearchResult
@@ -43,8 +43,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    getSearchContentsUseCase: GetSearchContentsUseCase,
-    recentSearchQueriesUseCase: GetRecentSearchQueriesUseCase,
+    getSearchContentsUseCase: ObserveSearchResultsUseCase,
+    recentSearchQueriesUseCase: ObserveRecentSearchQueriesUseCase,
     private val searchContentsRepository: SearchContentsRepository,
     private val recentSearchRepository: RecentSearchRepository,
     private val userDataRepository: UserDataRepository,

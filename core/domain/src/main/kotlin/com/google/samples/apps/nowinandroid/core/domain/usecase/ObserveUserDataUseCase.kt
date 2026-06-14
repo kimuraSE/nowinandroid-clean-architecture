@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.google.samples.apps.nowinandroid.core.domain
+package com.google.samples.apps.nowinandroid.core.domain.usecase
 
-import com.google.samples.apps.nowinandroid.core.domain.repository.RecentSearchRepository
-import com.google.samples.apps.nowinandroid.core.model.data.RecentSearchQuery
+import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
+import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 /**
- * A use case which returns the recent search queries.
+ * ユーザーデータ（フォロー・ブックマーク・表示設定など）のストリームを観察する。
  */
-class GetRecentSearchQueriesUseCase @Inject constructor(
-    private val recentSearchRepository: RecentSearchRepository,
+class ObserveUserDataUseCase @Inject constructor(
+    private val userDataRepository: UserDataRepository,
 ) {
-    operator fun invoke(limit: Int = 10): Flow<List<RecentSearchQuery>> =
-        recentSearchRepository.getRecentSearchQueries(limit)
+    operator fun invoke(): Flow<UserData> = userDataRepository.userData
 }

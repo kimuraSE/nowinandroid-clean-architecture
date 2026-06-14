@@ -19,9 +19,9 @@ package com.google.samples.apps.nowinandroid.feature.interests.impl
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.samples.apps.nowinandroid.core.domain.GetFollowableTopicsUseCase
-import com.google.samples.apps.nowinandroid.core.domain.TopicSortField
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicsUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.TopicSortField
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
@@ -39,7 +39,7 @@ import kotlinx.coroutines.launch
 class InterestsViewModel @AssistedInject constructor(
     private val savedStateHandle: SavedStateHandle,
     val userDataRepository: UserDataRepository,
-    getFollowableTopics: GetFollowableTopicsUseCase,
+    getFollowableTopics: ObserveFollowableTopicsUseCase,
     // TODO: see comment below
     @Assisted val key: InterestsNavKey,
 ) : ViewModel() {

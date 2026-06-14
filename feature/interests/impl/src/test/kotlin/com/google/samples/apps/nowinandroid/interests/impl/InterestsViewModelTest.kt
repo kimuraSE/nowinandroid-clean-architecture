@@ -18,7 +18,7 @@ package com.google.samples.apps.nowinandroid.interests.impl
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.testing.invoke
-import com.google.samples.apps.nowinandroid.core.domain.GetFollowableTopicsUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.model.data.TopicId
@@ -59,7 +59,7 @@ class InterestsViewModelTest {
 
     private val userDataRepository = TestUserDataRepository()
     private val topicsRepository = TestTopicsRepository()
-    private val getFollowableTopicsUseCase = GetFollowableTopicsUseCase(
+    private val getFollowableTopicsUseCase = ObserveFollowableTopicsUseCase(
         topicsRepository = topicsRepository,
         userDataRepository = userDataRepository,
     )

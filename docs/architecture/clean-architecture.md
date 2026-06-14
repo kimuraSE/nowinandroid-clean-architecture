@@ -122,7 +122,7 @@ sealed interface BookmarksEvent {
 
 ## 7. テスト規約
 
-- UseCase は単体テストを書く（Repository をテストダブルに差し替え）
+- UseCase はロジック（合成・分岐・ソート・`Result` の成否など）を持つものに単体テストを書く（Repository をテストダブルに差し替え）。Repository を 1 行呼ぶだけの純粋な委譲 UseCase はテストダブルの確認に過ぎないため省略し、ViewModel テストで間接的に検証する
 - ViewModel テストは `onEvent` 経由で操作し、`uiState` の遷移を検証する
 - リアーキの各ステップは `./gradlew assembleDemoDebug` とユニットテストが green であることを完了条件とする
 

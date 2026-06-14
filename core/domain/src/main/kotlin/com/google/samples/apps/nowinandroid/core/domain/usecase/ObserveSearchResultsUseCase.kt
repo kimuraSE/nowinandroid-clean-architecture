@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.samples.apps.nowinandroid.core.domain
+package com.google.samples.apps.nowinandroid.core.domain.usecase
 
 import com.google.samples.apps.nowinandroid.core.domain.repository.SearchContentsRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
@@ -28,21 +28,20 @@ import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 /**
- * A use case which returns the searched contents matched with the search query.
+ * 検索クエリにマッチしたコンテンツを、ユーザー状態付きで観察する。
  */
-class GetSearchContentsUseCase @Inject constructor(
+class ObserveSearchResultsUseCase @Inject constructor(
     private val searchContentsRepository: SearchContentsRepository,
     private val userDataRepository: UserDataRepository,
 ) {
-
-    operator fun invoke(
-        searchQuery: String,
-    ): Flow<UserSearchResult> =
+    operator fun invoke(searchQuery: String): Flow<UserSearchResult> =
         searchContentsRepository.searchContents(searchQuery)
             .mapToUserSearchResult(userDataRepository.userData)
 }
 
-private fun Flow<SearchResult>.mapToUserSearchResult(userDataStream: Flow<UserData>): Flow<UserSearchResult> =
+private fun Flow<SearchResult>.mapToUserSearchResult(
+    userDataStream: Flow<UserData>,
+): Flow<UserSearchResult> =
     combine(userDataStream) { searchResult, userData ->
         UserSearchResult(
             topics = searchResult.topics.map { topic ->
