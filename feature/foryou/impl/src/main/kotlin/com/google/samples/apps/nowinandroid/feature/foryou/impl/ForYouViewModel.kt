@@ -54,7 +54,7 @@ class ForYouViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val shouldShowOnboarding: Flow<Boolean> =
-        userDataRepository.userData.map { !it.shouldHideOnboarding }
+        userDataRepository.userData.map { it.shouldShowOnboarding() }
 
     val deepLinkedNewsResource = savedStateHandle.getStateFlow<String?>(
         key = DEEP_LINK_NEWS_RESOURCE_ID_KEY,

@@ -45,11 +45,11 @@ data class UserNewsResource internal constructor(
         followableTopics = newsResource.topics.map { topic ->
             FollowableTopic(
                 topic = topic,
-                isFollowed = topic.id in userData.followedTopics,
+                isFollowed = userData.isFollowing(topic.id),
             )
         },
-        isSaved = newsResource.id in userData.bookmarkedNewsResources,
-        hasBeenViewed = newsResource.id in userData.viewedNewsResources,
+        isSaved = userData.hasBookmarked(newsResource.id),
+        hasBeenViewed = userData.hasViewed(newsResource.id),
     )
 }
 

@@ -27,4 +27,18 @@ data class UserData(
     val darkThemeConfig: DarkThemeConfig,
     val useDynamicColor: Boolean,
     val shouldHideOnboarding: Boolean,
-)
+) {
+    /** [topicId] のトピックをユーザーがフォロー中か。 */
+    fun isFollowing(topicId: TopicId): Boolean = topicId in followedTopics
+
+    /** [newsResourceId] のニュースをユーザーがブックマーク済みか。 */
+    fun hasBookmarked(newsResourceId: NewsResourceId): Boolean =
+        newsResourceId in bookmarkedNewsResources
+
+    /** [newsResourceId] のニュースをユーザーが閲覧済みか。 */
+    fun hasViewed(newsResourceId: NewsResourceId): Boolean =
+        newsResourceId in viewedNewsResources
+
+    /** オンボーディングを表示すべきか（ユーザーが非表示にしていない間）。 */
+    fun shouldShowOnboarding(): Boolean = !shouldHideOnboarding
+}

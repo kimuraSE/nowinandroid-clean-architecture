@@ -45,7 +45,7 @@ class GetFollowableTopicsUseCase @Inject constructor(
             .map { topic ->
                 FollowableTopic(
                     topic = topic,
-                    isFollowed = topic.id in userData.followedTopics,
+                    isFollowed = userData.isFollowing(topic.id),
                 )
             }
         when (sortBy) {

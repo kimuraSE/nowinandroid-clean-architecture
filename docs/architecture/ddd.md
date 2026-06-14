@@ -50,9 +50,14 @@ data class UserData(
 ) {
     fun isFollowing(topicId: TopicId): Boolean = topicId in followedTopics
 
-    fun shouldShowOnboarding(): Boolean = !shouldHideOnboarding && followedTopics.isEmpty()
+    fun hasBookmarked(newsResourceId: NewsResourceId): Boolean =
+        newsResourceId in bookmarkedNewsResources
+
+    fun shouldShowOnboarding(): Boolean = !shouldHideOnboarding
 }
 ```
+
+例えば「トピックがフォロー済みか」の判定は `topic.id in userData.followedTopics` を各所に散らすのではなく `userData.isFollowing(topic.id)` に集約する（`UserNewsResource` の組み立てや `GetFollowableTopicsUseCase` がこれを使う）。
 
 - 判断（〜かどうか）・導出（〜から計算できる値）はドメインモデルのメソッドへ
 - 複数 Repository をまたぐ調整・合成は UseCase へ
