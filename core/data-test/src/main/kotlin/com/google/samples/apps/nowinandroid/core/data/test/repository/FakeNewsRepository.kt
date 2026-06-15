@@ -20,7 +20,7 @@ import com.google.samples.apps.nowinandroid.core.common.network.Dispatcher
 import com.google.samples.apps.nowinandroid.core.common.network.NiaDispatchers.IO
 import com.google.samples.apps.nowinandroid.core.data.Syncable
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
-import com.google.samples.apps.nowinandroid.core.data.model.asExternalModel
+import com.google.samples.apps.nowinandroid.core.data.model.toDomain
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsRepository
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
@@ -65,7 +65,7 @@ class FakeNewsRepository @Inject constructor(
                         )
                             .all(true::equals)
                     }
-                    .map { it.asExternalModel(topics) },
+                    .map { it.toDomain(topics) },
             )
         }.flowOn(ioDispatcher)
 

@@ -42,7 +42,7 @@ data class NewsResourceEntity(
     val type: String,
 )
 
-fun NewsResourceEntity.asExternalModel() = NewsResource(
+fun NewsResourceEntity.toDomain() = NewsResource(
     id = NewsResourceId(id),
     title = title,
     content = content,

@@ -34,7 +34,7 @@ data class NetworkTopic(
     val followed: Boolean = false,
 )
 
-fun NetworkTopic.asExternalModel(): Topic =
+fun NetworkTopic.toDomain(): Topic =
     Topic(
         id = TopicId(id),
         name = name,

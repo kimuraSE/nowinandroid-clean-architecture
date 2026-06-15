@@ -42,7 +42,7 @@ data class TopicEntity(
     val imageUrl: String,
 )
 
-fun TopicEntity.asExternalModel() = Topic(
+fun TopicEntity.toDomain() = Topic(
     id = TopicId(id),
     name = name,
     shortDescription = shortDescription,

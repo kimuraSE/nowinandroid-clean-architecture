@@ -23,9 +23,9 @@ import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkNewsResource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkTopic
-import com.google.samples.apps.nowinandroid.core.network.model.asExternalModel
+import com.google.samples.apps.nowinandroid.core.network.model.toDomain
 
-fun NetworkNewsResource.asEntity() = NewsResourceEntity(
+fun NetworkNewsResource.toEntity() = NewsResourceEntity(
     id = id,
     title = title,
     content = content,
@@ -59,7 +59,7 @@ fun NetworkNewsResource.topicCrossReferences(): List<NewsResourceTopicCrossRef> 
         )
     }
 
-fun NetworkNewsResource.asExternalModel(topics: List<NetworkTopic>) =
+fun NetworkNewsResource.toDomain(topics: List<NetworkTopic>) =
     NewsResource(
         id = NewsResourceId(id),
         title = title,
@@ -70,5 +70,5 @@ fun NetworkNewsResource.asExternalModel(topics: List<NetworkTopic>) =
         type = type,
         topics = topics
             .filter { networkTopic -> this.topics.contains(networkTopic.id) }
-            .map(NetworkTopic::asExternalModel),
+            .map(NetworkTopic::toDomain),
     )

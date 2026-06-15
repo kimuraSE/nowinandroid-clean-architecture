@@ -22,7 +22,7 @@ import com.google.samples.apps.nowinandroid.core.model.data.RecentSearchQuery
 /**
  * Room エンティティ [RecentSearchQueryEntity] をドメインモデル [RecentSearchQuery] に変換する。
  */
-fun RecentSearchQueryEntity.asExternalModel() = RecentSearchQuery(
+fun RecentSearchQueryEntity.toDomain() = RecentSearchQuery(
     query = query,
     queriedDate = queriedDate,
 )

@@ -19,7 +19,7 @@ package com.google.samples.apps.nowinandroid.core.data.model
 import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkTopic
 
-fun NetworkTopic.asEntity() = TopicEntity(
+fun NetworkTopic.toEntity() = TopicEntity(
     id = id,
     name = name,
     shortDescription = shortDescription,

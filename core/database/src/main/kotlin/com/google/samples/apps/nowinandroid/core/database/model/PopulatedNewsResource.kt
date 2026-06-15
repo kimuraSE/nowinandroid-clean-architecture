@@ -40,7 +40,7 @@ data class PopulatedNewsResource(
     val topics: List<TopicEntity>,
 )
 
-fun PopulatedNewsResource.asExternalModel() = NewsResource(
+fun PopulatedNewsResource.toDomain() = NewsResource(
     id = NewsResourceId(entity.id),
     title = entity.title,
     content = entity.content,
@@ -48,7 +48,7 @@ fun PopulatedNewsResource.asExternalModel() = NewsResource(
     headerImageUrl = entity.headerImageUrl,
     publishDate = entity.publishDate,
     type = entity.type,
-    topics = topics.map(TopicEntity::asExternalModel),
+    topics = topics.map(TopicEntity::toDomain),
 )
 
 fun PopulatedNewsResource.asFtsEntity() = NewsResourceFtsEntity(

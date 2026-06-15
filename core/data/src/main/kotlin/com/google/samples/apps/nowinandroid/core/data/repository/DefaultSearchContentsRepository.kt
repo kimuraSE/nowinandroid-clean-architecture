@@ -23,8 +23,8 @@ import com.google.samples.apps.nowinandroid.core.database.dao.NewsResourceFtsDao
 import com.google.samples.apps.nowinandroid.core.database.dao.TopicDao
 import com.google.samples.apps.nowinandroid.core.database.dao.TopicFtsDao
 import com.google.samples.apps.nowinandroid.core.database.model.PopulatedNewsResource
-import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
 import com.google.samples.apps.nowinandroid.core.database.model.asFtsEntity
+import com.google.samples.apps.nowinandroid.core.database.model.toDomain
 import com.google.samples.apps.nowinandroid.core.domain.repository.SearchContentsRepository
 import com.google.samples.apps.nowinandroid.core.model.data.SearchResult
 import kotlinx.coroutines.CoroutineDispatcher
@@ -77,8 +77,8 @@ internal class DefaultSearchContentsRepository @Inject constructor(
             .flatMapLatest(topicDao::getTopicEntities)
         return combine(newsResourcesFlow, topicsFlow) { newsResources, topics ->
             SearchResult(
-                topics = topics.map { it.asExternalModel() },
-                newsResources = newsResources.map { it.asExternalModel() },
+                topics = topics.map { it.toDomain() },
+                newsResources = newsResources.map { it.toDomain() },
             )
         }
     }

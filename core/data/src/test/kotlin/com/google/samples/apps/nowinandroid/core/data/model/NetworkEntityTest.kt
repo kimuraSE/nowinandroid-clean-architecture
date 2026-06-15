@@ -22,7 +22,7 @@ import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkNewsResource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkTopic
-import com.google.samples.apps.nowinandroid.core.network.model.asExternalModel
+import com.google.samples.apps.nowinandroid.core.network.model.toDomain
 import kotlinx.datetime.Instant
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -39,7 +39,7 @@ class NetworkEntityTest {
             url = "URL",
             imageUrl = "image URL",
         )
-        val entity = networkModel.asEntity()
+        val entity = networkModel.toEntity()
 
         assertEquals("0", entity.id)
         assertEquals("Test", entity.name)
@@ -61,7 +61,7 @@ class NetworkEntityTest {
                 publishDate = Instant.fromEpochMilliseconds(1),
                 type = "Article 📚",
             )
-        val entity = networkModel.asEntity()
+        val entity = networkModel.toEntity()
 
         assertEquals("0", entity.id)
         assertEquals("title", entity.title)
@@ -92,7 +92,7 @@ class NetworkEntityTest {
             imageUrl = "imageUrl",
         )
 
-        assertEquals(expected, networkTopic.asExternalModel())
+        assertEquals(expected, networkTopic.toDomain())
     }
 
     @Test
@@ -135,8 +135,8 @@ class NetworkEntityTest {
             headerImageUrl = "headerImageUrl",
             publishDate = Instant.fromEpochMilliseconds(1),
             type = "Article 📚",
-            topics = networkTopics.map(NetworkTopic::asExternalModel),
+            topics = networkTopics.map(NetworkTopic::toDomain),
         )
-        assertEquals(expected, networkNewsResource.asExternalModel(networkTopics))
+        assertEquals(expected, networkNewsResource.toDomain(networkTopics))
     }
 }

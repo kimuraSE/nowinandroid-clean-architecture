@@ -48,7 +48,7 @@ class PopulatedNewsResourceKtTest {
                 ),
             ),
         )
-        val newsResource = populatedNewsResource.asExternalModel()
+        val newsResource = populatedNewsResource.toDomain()
 
         assertEquals(
             NewsResource(

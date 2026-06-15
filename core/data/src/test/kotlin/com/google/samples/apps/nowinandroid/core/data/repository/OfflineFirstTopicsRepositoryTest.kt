@@ -17,13 +17,13 @@
 package com.google.samples.apps.nowinandroid.core.data.repository
 
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
-import com.google.samples.apps.nowinandroid.core.data.model.asEntity
+import com.google.samples.apps.nowinandroid.core.data.model.toEntity
 import com.google.samples.apps.nowinandroid.core.data.testdoubles.CollectionType
 import com.google.samples.apps.nowinandroid.core.data.testdoubles.TestNiaNetworkDataSource
 import com.google.samples.apps.nowinandroid.core.data.testdoubles.TestTopicDao
 import com.google.samples.apps.nowinandroid.core.database.dao.TopicDao
 import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
-import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
+import com.google.samples.apps.nowinandroid.core.database.model.toDomain
 import com.google.samples.apps.nowinandroid.core.datastore.NiaPreferencesDataSource
 import com.google.samples.apps.nowinandroid.core.datastore.UserPreferences
 import com.google.samples.apps.nowinandroid.core.datastore.test.InMemoryDataStore
@@ -72,7 +72,7 @@ class OfflineFirstTopicsRepositoryTest {
             assertEquals(
                 topicDao.getTopicEntities()
                     .first()
-                    .map(TopicEntity::asExternalModel),
+                    .map(TopicEntity::toDomain),
                 subject.getTopics()
                     .first(),
             )
@@ -84,7 +84,7 @@ class OfflineFirstTopicsRepositoryTest {
             subject.syncWith(synchronizer)
 
             val networkTopics = network.getTopics()
-                .map(NetworkTopic::asEntity)
+                .map(NetworkTopic::toEntity)
 
             val dbTopics = topicDao.getTopicEntities()
                 .first()
@@ -112,7 +112,7 @@ class OfflineFirstTopicsRepositoryTest {
             subject.syncWith(synchronizer)
 
             val networkTopics = network.getTopics()
-                .map(NetworkTopic::asEntity)
+                .map(NetworkTopic::toEntity)
                 // Drop 10 to simulate the first 10 items being unchanged
                 .drop(10)
 
@@ -135,8 +135,8 @@ class OfflineFirstTopicsRepositoryTest {
     fun offlineFirstTopicsRepository_sync_deletes_items_marked_deleted_on_network() =
         testScope.runTest {
             val networkTopics = network.getTopics()
-                .map(NetworkTopic::asEntity)
-                .map(TopicEntity::asExternalModel)
+                .map(NetworkTopic::toEntity)
+                .map(TopicEntity::toDomain)
 
             // Delete half of the items on the network
             val deletedItems = networkTopics
@@ -157,7 +157,7 @@ class OfflineFirstTopicsRepositoryTest {
 
             val dbTopics = topicDao.getTopicEntities()
                 .first()
-                .map(TopicEntity::asExternalModel)
+                .map(TopicEntity::toDomain)
 
             // Assert that items marked deleted on the network have been deleted locally
             assertEquals(

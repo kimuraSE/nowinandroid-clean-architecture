@@ -17,7 +17,7 @@
 package com.google.samples.apps.nowinandroid.core.data.repository
 
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
-import com.google.samples.apps.nowinandroid.core.data.model.asEntity
+import com.google.samples.apps.nowinandroid.core.data.model.toEntity
 import com.google.samples.apps.nowinandroid.core.data.model.topicCrossReferences
 import com.google.samples.apps.nowinandroid.core.data.model.topicEntityShells
 import com.google.samples.apps.nowinandroid.core.data.testdoubles.CollectionType
@@ -30,7 +30,7 @@ import com.google.samples.apps.nowinandroid.core.database.model.NewsResourceEnti
 import com.google.samples.apps.nowinandroid.core.database.model.NewsResourceTopicCrossRef
 import com.google.samples.apps.nowinandroid.core.database.model.PopulatedNewsResource
 import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
-import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
+import com.google.samples.apps.nowinandroid.core.database.model.toDomain
 import com.google.samples.apps.nowinandroid.core.datastore.NiaPreferencesDataSource
 import com.google.samples.apps.nowinandroid.core.datastore.UserPreferences
 import com.google.samples.apps.nowinandroid.core.datastore.test.InMemoryDataStore
@@ -96,7 +96,7 @@ class OfflineFirstNewsRepositoryTest {
             assertEquals(
                 newsResourceDao.getNewsResources()
                     .first()
-                    .map(PopulatedNewsResource::asExternalModel),
+                    .map(PopulatedNewsResource::toDomain),
                 subject.getNewsResources()
                     .first(),
             )
@@ -111,7 +111,7 @@ class OfflineFirstNewsRepositoryTest {
                     useFilterTopicIds = true,
                 )
                     .first()
-                    .map(PopulatedNewsResource::asExternalModel),
+                    .map(PopulatedNewsResource::toDomain),
                 actual = subject.getNewsResources(
                     query = NewsResourceQuery(
                         filterTopicIds = filteredInterestsIds.mapTo(mutableSetOf(), ::TopicId),
@@ -139,12 +139,12 @@ class OfflineFirstNewsRepositoryTest {
             subject.syncWith(synchronizer)
 
             val newsResourcesFromNetwork = network.getNewsResources()
-                .map(NetworkNewsResource::asEntity)
-                .map(NewsResourceEntity::asExternalModel)
+                .map(NetworkNewsResource::toEntity)
+                .map(NewsResourceEntity::toDomain)
 
             val newsResourcesFromDb = newsResourceDao.getNewsResources()
                 .first()
-                .map(PopulatedNewsResource::asExternalModel)
+                .map(PopulatedNewsResource::toDomain)
 
             assertEquals(
                 newsResourcesFromNetwork.map { it.id.value }.sorted(),
@@ -168,8 +168,8 @@ class OfflineFirstNewsRepositoryTest {
             niaPreferencesDataSource.setShouldHideOnboarding(false)
 
             val newsResourcesFromNetwork = network.getNewsResources()
-                .map(NetworkNewsResource::asEntity)
-                .map(NewsResourceEntity::asExternalModel)
+                .map(NetworkNewsResource::toEntity)
+                .map(NewsResourceEntity::toDomain)
 
             // Delete half of the items on the network
             val deletedItems = newsResourcesFromNetwork
@@ -190,7 +190,7 @@ class OfflineFirstNewsRepositoryTest {
 
             val newsResourcesFromDb = newsResourceDao.getNewsResources()
                 .first()
-                .map(PopulatedNewsResource::asExternalModel)
+                .map(PopulatedNewsResource::toDomain)
 
             // Assert that items marked deleted on the network have been deleted locally
             assertEquals(
@@ -231,13 +231,13 @@ class OfflineFirstNewsRepositoryTest {
                 .toSet()
 
             val newsResourcesFromNetwork = network.getNewsResources()
-                .map(NetworkNewsResource::asEntity)
-                .map(NewsResourceEntity::asExternalModel)
+                .map(NetworkNewsResource::toEntity)
+                .map(NewsResourceEntity::toDomain)
                 .filter { it.id.value in changeListIds }
 
             val newsResourcesFromDb = newsResourceDao.getNewsResources()
                 .first()
-                .map(PopulatedNewsResource::asExternalModel)
+                .map(PopulatedNewsResource::toDomain)
 
             assertEquals(
                 expected = newsResourcesFromNetwork.map { it.id.value }.sorted(),
@@ -359,10 +359,10 @@ class OfflineFirstNewsRepositoryTest {
             niaPreferencesDataSource.setShouldHideOnboarding(true)
 
             val networkNewsResources = network.getNewsResources()
-                .map(NetworkNewsResource::asEntity)
+                .map(NetworkNewsResource::toEntity)
 
             val newsResources = networkNewsResources
-                .map(NewsResourceEntity::asExternalModel)
+                .map(NewsResourceEntity::toDomain)
 
             // Prepopulate dao with news resources
             newsResourceDao.upsertNewsResources(networkNewsResources)

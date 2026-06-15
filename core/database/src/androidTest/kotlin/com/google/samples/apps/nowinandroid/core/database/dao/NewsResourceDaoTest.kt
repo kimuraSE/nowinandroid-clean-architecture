@@ -19,7 +19,7 @@ package com.google.samples.apps.nowinandroid.core.database.dao
 import com.google.samples.apps.nowinandroid.core.database.model.NewsResourceEntity
 import com.google.samples.apps.nowinandroid.core.database.model.NewsResourceTopicCrossRef
 import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
-import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
+import com.google.samples.apps.nowinandroid.core.database.model.toDomain
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Instant
@@ -58,7 +58,7 @@ internal class NewsResourceDaoTest : DatabaseTest() {
         assertEquals(
             listOf(3L, 2L, 1L, 0L),
             savedNewsResourceEntities.map {
-                it.asExternalModel().publishDate.toEpochMilliseconds()
+                it.toDomain().publishDate.toEpochMilliseconds()
             },
         )
     }

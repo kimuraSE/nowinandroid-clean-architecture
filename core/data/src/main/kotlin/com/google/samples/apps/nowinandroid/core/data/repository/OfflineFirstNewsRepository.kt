@@ -19,14 +19,14 @@ package com.google.samples.apps.nowinandroid.core.data.repository
 import com.google.samples.apps.nowinandroid.core.data.Syncable
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
 import com.google.samples.apps.nowinandroid.core.data.changeListSync
-import com.google.samples.apps.nowinandroid.core.data.model.asEntity
+import com.google.samples.apps.nowinandroid.core.data.model.toEntity
 import com.google.samples.apps.nowinandroid.core.data.model.topicCrossReferences
 import com.google.samples.apps.nowinandroid.core.data.model.topicEntityShells
 import com.google.samples.apps.nowinandroid.core.database.dao.NewsResourceDao
 import com.google.samples.apps.nowinandroid.core.database.dao.TopicDao
 import com.google.samples.apps.nowinandroid.core.database.model.PopulatedNewsResource
 import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
-import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
+import com.google.samples.apps.nowinandroid.core.database.model.toDomain
 import com.google.samples.apps.nowinandroid.core.datastore.ChangeListVersions
 import com.google.samples.apps.nowinandroid.core.datastore.NiaPreferencesDataSource
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsRepository
@@ -65,7 +65,7 @@ class OfflineFirstNewsRepository @Inject constructor(
         useFilterNewsIds = query.filterNewsIds != null,
         filterNewsIds = query.filterNewsIds?.map { it.value }?.toSet() ?: emptySet(),
     )
-        .map { it.map(PopulatedNewsResource::asExternalModel) }
+        .map { it.map(PopulatedNewsResource::toDomain) }
 
     override suspend fun syncWith(synchronizer: Synchronizer): Boolean {
         var isFirstSync = false
@@ -117,7 +117,7 @@ class OfflineFirstNewsRepository @Inject constructor(
                     )
                     newsResourceDao.upsertNewsResources(
                         newsResourceEntities = networkNewsResources.map(
-                            NetworkNewsResource::asEntity,
+                            NetworkNewsResource::toEntity,
                         ),
                     )
                     newsResourceDao.insertOrIgnoreTopicCrossRefEntities(
@@ -136,7 +136,7 @@ class OfflineFirstNewsRepository @Inject constructor(
                         filterNewsIds = changedIds.toSet() - existingNewsResourceIdsThatHaveChanged,
                     )
                         .first()
-                        .map(PopulatedNewsResource::asExternalModel)
+                        .map(PopulatedNewsResource::toDomain)
 
                     if (addedNewsResources.isNotEmpty()) {
                         notifier.postNewsNotifications(

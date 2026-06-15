@@ -16,7 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.core.data.repository
 
-import com.google.samples.apps.nowinandroid.core.data.model.asExternalModel
+import com.google.samples.apps.nowinandroid.core.data.model.toDomain
 import com.google.samples.apps.nowinandroid.core.database.dao.RecentSearchQueryDao
 import com.google.samples.apps.nowinandroid.core.database.model.RecentSearchQueryEntity
 import com.google.samples.apps.nowinandroid.core.domain.repository.RecentSearchRepository
@@ -40,7 +40,7 @@ internal class DefaultRecentSearchRepository @Inject constructor(
 
     override fun getRecentSearchQueries(limit: Int): Flow<List<RecentSearchQuery>> =
         recentSearchQueryDao.getRecentSearchQueryEntities(limit).map { searchQueries ->
-            searchQueries.map { it.asExternalModel() }
+            searchQueries.map { it.toDomain() }
         }
 
     override suspend fun clearRecentSearches() = recentSearchQueryDao.clearRecentSearchQueries()

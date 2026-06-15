@@ -19,10 +19,10 @@ package com.google.samples.apps.nowinandroid.core.data.repository
 import com.google.samples.apps.nowinandroid.core.data.Syncable
 import com.google.samples.apps.nowinandroid.core.data.Synchronizer
 import com.google.samples.apps.nowinandroid.core.data.changeListSync
-import com.google.samples.apps.nowinandroid.core.data.model.asEntity
+import com.google.samples.apps.nowinandroid.core.data.model.toEntity
 import com.google.samples.apps.nowinandroid.core.database.dao.TopicDao
 import com.google.samples.apps.nowinandroid.core.database.model.TopicEntity
-import com.google.samples.apps.nowinandroid.core.database.model.asExternalModel
+import com.google.samples.apps.nowinandroid.core.database.model.toDomain
 import com.google.samples.apps.nowinandroid.core.datastore.ChangeListVersions
 import com.google.samples.apps.nowinandroid.core.domain.repository.TopicsRepository
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
@@ -44,10 +44,10 @@ class OfflineFirstTopicsRepository @Inject constructor(
 
     override fun getTopics(): Flow<List<Topic>> =
         topicDao.getTopicEntities()
-            .map { it.map(TopicEntity::asExternalModel) }
+            .map { it.map(TopicEntity::toDomain) }
 
     override fun getTopic(id: TopicId): Flow<Topic> =
-        topicDao.getTopicEntity(id.value).map { it.asExternalModel() }
+        topicDao.getTopicEntity(id.value).map { it.toDomain() }
 
     override suspend fun syncWith(synchronizer: Synchronizer): Boolean =
         synchronizer.changeListSync(
@@ -62,7 +62,7 @@ class OfflineFirstTopicsRepository @Inject constructor(
             modelUpdater = { changedIds ->
                 val networkTopics = network.getTopics(ids = changedIds)
                 topicDao.upsertTopics(
-                    entities = networkTopics.map(NetworkTopic::asEntity),
+                    entities = networkTopics.map(NetworkTopic::toEntity),
                 )
             },
         )
