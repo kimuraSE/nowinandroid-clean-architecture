@@ -35,7 +35,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.samples.apps.nowinandroid.core.testing.data.userNewsResourcesTestData
-import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState
 import com.google.samples.apps.nowinandroid.feature.bookmarks.api.R
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -55,11 +54,10 @@ class BookmarksScreenTest {
     fun loading_showsLoadingSpinner() {
         composeTestRule.setContent {
             BookmarksScreen(
-                feedState = NewsFeedUiState.Loading,
+                uiState = BookmarksUiState.Loading,
+                onEvent = {},
                 onShowSnackbar = { _, _ -> false },
-                removeFromBookmarks = {},
                 onTopicClick = {},
-                onNewsResourceViewed = {},
             )
         }
 
@@ -74,13 +72,10 @@ class BookmarksScreenTest {
     fun feed_whenHasBookmarks_showsBookmarks() {
         composeTestRule.setContent {
             BookmarksScreen(
-                feedState = NewsFeedUiState.Success(
-                    userNewsResourcesTestData.take(2),
-                ),
+                uiState = BookmarksUiState.Success(userNewsResourcesTestData.take(2)),
+                onEvent = {},
                 onShowSnackbar = { _, _ -> false },
-                removeFromBookmarks = {},
                 onTopicClick = {},
-                onNewsResourceViewed = {},
             )
         }
 
@@ -115,16 +110,15 @@ class BookmarksScreenTest {
 
         composeTestRule.setContent {
             BookmarksScreen(
-                feedState = NewsFeedUiState.Success(
-                    userNewsResourcesTestData.take(2),
-                ),
-                onShowSnackbar = { _, _ -> false },
-                removeFromBookmarks = { newsResourceId ->
-                    assertEquals(userNewsResourcesTestData[0].id, newsResourceId)
-                    removeFromBookmarksCalled = true
+                uiState = BookmarksUiState.Success(userNewsResourcesTestData.take(2)),
+                onEvent = { event ->
+                    if (event is BookmarksEvent.RemoveBookmark) {
+                        assertEquals(userNewsResourcesTestData[0].id, event.id)
+                        removeFromBookmarksCalled = true
+                    }
                 },
+                onShowSnackbar = { _, _ -> false },
                 onTopicClick = {},
-                onNewsResourceViewed = {},
             )
         }
 
@@ -152,11 +146,10 @@ class BookmarksScreenTest {
     fun feed_whenHasNoBookmarks_showsEmptyState() {
         composeTestRule.setContent {
             BookmarksScreen(
-                feedState = NewsFeedUiState.Success(emptyList()),
+                uiState = BookmarksUiState.Success(emptyList()),
+                onEvent = {},
                 onShowSnackbar = { _, _ -> false },
-                removeFromBookmarks = {},
                 onTopicClick = {},
-                onNewsResourceViewed = {},
             )
         }
 
@@ -181,14 +174,14 @@ class BookmarksScreenTest {
         composeTestRule.setContent {
             CompositionLocalProvider(LocalLifecycleOwner provides testLifecycleOwner) {
                 BookmarksScreen(
-                    feedState = NewsFeedUiState.Success(emptyList()),
-                    onShowSnackbar = { _, _ -> false },
-                    removeFromBookmarks = {},
-                    onTopicClick = {},
-                    onNewsResourceViewed = {},
-                    clearUndoState = {
-                        undoStateCleared = true
+                    uiState = BookmarksUiState.Success(emptyList()),
+                    onEvent = { event ->
+                        if (event is BookmarksEvent.ClearUndoState) {
+                            undoStateCleared = true
+                        }
                     },
+                    onShowSnackbar = { _, _ -> false },
+                    onTopicClick = {},
                 )
             }
         }

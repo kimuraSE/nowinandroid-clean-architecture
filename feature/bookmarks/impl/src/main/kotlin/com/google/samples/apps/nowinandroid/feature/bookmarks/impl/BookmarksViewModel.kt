@@ -16,70 +16,83 @@
 
 package com.google.samples.apps.nowinandroid.feature.bookmarks.impl
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
-import com.google.samples.apps.nowinandroid.core.domain.repository.UserNewsResourceRepository
+import com.google.samples.apps.nowinandroid.core.domain.usecase.BookmarkNewsResourceUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.MarkNewsResourceViewedUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveBookmarkedNewsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
-import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState
-import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState.Loading
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class BookmarksViewModel @Inject constructor(
-    private val userDataRepository: UserDataRepository,
-    userNewsResourceRepository: UserNewsResourceRepository,
+    observeBookmarkedNews: ObserveBookmarkedNewsUseCase,
+    private val bookmarkNewsResource: BookmarkNewsResourceUseCase,
+    private val markNewsResourceViewed: MarkNewsResourceViewedUseCase,
 ) : ViewModel() {
 
-    var shouldDisplayUndoBookmark by mutableStateOf(false)
-    private var lastRemovedBookmarkId: String? = null
+    /** 直前に解除したブックマーク。null でなければ「取り消し」を提示中。 */
+    private val lastRemovedBookmarkId = MutableStateFlow<NewsResourceId?>(null)
 
-    val feedUiState: StateFlow<NewsFeedUiState> =
-        userNewsResourceRepository.observeAllBookmarked()
-            .map<List<UserNewsResource>, NewsFeedUiState>(NewsFeedUiState::Success)
-            .onStart { emit(Loading) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = Loading,
-            )
+    val uiState: StateFlow<BookmarksUiState> = combine(
+        observeBookmarkedNews(),
+        lastRemovedBookmarkId,
+        ::toUiState,
+    )
+        .catch { emit(BookmarksUiState.Error) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = BookmarksUiState.Loading,
+        )
 
-    fun removeFromSavedResources(newsResourceId: String) {
-        viewModelScope.launch {
-            shouldDisplayUndoBookmark = true
-            lastRemovedBookmarkId = newsResourceId
-            userDataRepository.setNewsResourceBookmarked(NewsResourceId(newsResourceId), false)
+    fun onEvent(event: BookmarksEvent) {
+        when (event) {
+            is BookmarksEvent.RemoveBookmark -> removeFromBookmarks(event.id)
+            BookmarksEvent.UndoBookmarkRemoval -> undoBookmarkRemoval()
+            BookmarksEvent.ClearUndoState -> clearUndoState()
+            is BookmarksEvent.MarkAsViewed -> markViewed(event.id)
         }
     }
 
-    fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) {
+    private fun removeFromBookmarks(id: NewsResourceId) {
         viewModelScope.launch {
-            userDataRepository.setNewsResourceViewed(NewsResourceId(newsResourceId), viewed)
+            lastRemovedBookmarkId.value = id
+            bookmarkNewsResource(id, bookmarked = false)
         }
     }
 
-    fun undoBookmarkRemoval() {
+    private fun undoBookmarkRemoval() {
         viewModelScope.launch {
-            lastRemovedBookmarkId?.let {
-                userDataRepository.setNewsResourceBookmarked(NewsResourceId(it), true)
-            }
+            lastRemovedBookmarkId.value?.let { bookmarkNewsResource(it, bookmarked = true) }
+            lastRemovedBookmarkId.value = null
         }
-        clearUndoState()
     }
 
-    fun clearUndoState() {
-        shouldDisplayUndoBookmark = false
-        lastRemovedBookmarkId = null
+    private fun clearUndoState() {
+        lastRemovedBookmarkId.value = null
+    }
+
+    private fun markViewed(id: NewsResourceId) {
+        viewModelScope.launch {
+            markNewsResourceViewed(id, viewed = true)
+        }
     }
 }
+
+private fun toUiState(
+    feed: List<UserNewsResource>,
+    lastRemovedBookmarkId: NewsResourceId?,
+): BookmarksUiState = BookmarksUiState.Success(
+    feed = feed,
+    shouldShowUndoBookmark = lastRemovedBookmarkId != null,
+)
