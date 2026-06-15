@@ -18,6 +18,7 @@ package com.google.samples.apps.nowinandroid.interests.impl
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.testing.invoke
+import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
 import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
@@ -26,6 +27,7 @@ import com.google.samples.apps.nowinandroid.core.testing.repository.TestTopicsRe
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
 import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
+import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsEvent
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsUiState
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsViewModel
 import kotlinx.coroutines.flow.collect
@@ -71,8 +73,8 @@ class InterestsViewModelTest {
             savedStateHandle = SavedStateHandle(
                 route = InterestsNavKey(initialTopicId = testInputTopics[0].topic.id.value),
             ),
-            userDataRepository = userDataRepository,
-            getFollowableTopics = getFollowableTopicsUseCase,
+            followTopic = FollowTopicUseCase(userDataRepository),
+            observeFollowableTopics = getFollowableTopicsUseCase,
             InterestsNavKey(initialTopicId = testInputTopics[0].topic.id.value),
         )
     }
@@ -104,9 +106,8 @@ class InterestsViewModelTest {
                 .topics.first { it.topic.id == toggleTopicId }.isFollowed,
         )
 
-        viewModel.followTopic(
-            followedTopicId = toggleTopicId.value,
-            true,
+        viewModel.onEvent(
+            InterestsEvent.FollowTopic(topicId = toggleTopicId, followed = true),
         )
 
         assertEquals(
@@ -135,9 +136,8 @@ class InterestsViewModelTest {
                 .topics.first { it.topic.id == toggleTopicId }.isFollowed,
         )
 
-        viewModel.followTopic(
-            followedTopicId = toggleTopicId.value,
-            false,
+        viewModel.onEvent(
+            InterestsEvent.FollowTopic(topicId = toggleTopicId, followed = false),
         )
 
         assertEquals(

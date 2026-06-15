@@ -29,6 +29,7 @@ import com.google.samples.apps.nowinandroid.core.designsystem.component.NiaBackg
 import com.google.samples.apps.nowinandroid.core.designsystem.component.NiaLoadingWheel
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.ui.DevicePreviews
 import com.google.samples.apps.nowinandroid.core.ui.FollowableTopicPreviewParameterProvider
 import com.google.samples.apps.nowinandroid.core.ui.TrackScreenViewEvent
@@ -45,12 +46,8 @@ fun InterestsScreen(
 
     InterestsScreen(
         uiState = uiState,
-        followTopic = viewModel::followTopic,
-        onTopicClick = {
-            // TODO: this violates SSOT, events should go through the ViewModel
-            viewModel.onTopicClick(it)
-            onTopicClick(it)
-        },
+        onEvent = viewModel::onEvent,
+        onTopicClick = onTopicClick,
         shouldHighlightSelectedTopic = shouldHighlightSelectedTopic,
         modifier = modifier,
     )
@@ -59,7 +56,7 @@ fun InterestsScreen(
 @Composable
 internal fun InterestsScreen(
     uiState: InterestsUiState,
-    followTopic: (String, Boolean) -> Unit,
+    onEvent: (InterestsEvent) -> Unit,
     onTopicClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     shouldHighlightSelectedTopic: Boolean = false,
@@ -77,8 +74,13 @@ internal fun InterestsScreen(
             is InterestsUiState.Interests ->
                 TopicsTabContent(
                     topics = uiState.topics,
-                    onTopicClick = onTopicClick,
-                    onFollowButtonClick = followTopic,
+                    onTopicClick = { topicId ->
+                        onEvent(InterestsEvent.SelectTopic(topicId))
+                        onTopicClick(topicId)
+                    },
+                    onFollowButtonClick = { topicId, followed ->
+                        onEvent(InterestsEvent.FollowTopic(TopicId(topicId), followed))
+                    },
                     selectedTopicId = uiState.selectedTopicId,
                     shouldHighlightSelectedTopic = shouldHighlightSelectedTopic,
                 )
@@ -107,7 +109,7 @@ fun InterestsScreenPopulated(
                     selectedTopicId = null,
                     topics = followableTopics,
                 ),
-                followTopic = { _, _ -> },
+                onEvent = {},
                 onTopicClick = {},
             )
         }
@@ -121,7 +123,7 @@ fun InterestsScreenLoading() {
         NiaBackground {
             InterestsScreen(
                 uiState = InterestsUiState.Loading,
-                followTopic = { _, _ -> },
+                onEvent = {},
                 onTopicClick = {},
             )
         }
@@ -135,7 +137,7 @@ fun InterestsScreenEmpty() {
         NiaBackground {
             InterestsScreen(
                 uiState = InterestsUiState.Empty,
-                followTopic = { _, _ -> },
+                onEvent = {},
                 onTopicClick = {},
             )
         }

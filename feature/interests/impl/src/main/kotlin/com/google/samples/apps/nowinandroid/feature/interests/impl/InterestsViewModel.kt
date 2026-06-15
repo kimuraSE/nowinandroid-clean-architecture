@@ -19,11 +19,9 @@ package com.google.samples.apps.nowinandroid.feature.interests.impl
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
+import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
 import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.core.domain.usecase.TopicSortField
-import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
-import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -38,8 +36,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = InterestsViewModel.Factory::class)
 class InterestsViewModel @AssistedInject constructor(
     private val savedStateHandle: SavedStateHandle,
-    val userDataRepository: UserDataRepository,
-    getFollowableTopics: ObserveFollowableTopicsUseCase,
+    private val followTopic: FollowTopicUseCase,
+    observeFollowableTopics: ObserveFollowableTopicsUseCase,
     // TODO: see comment below
     @Assisted val key: InterestsNavKey,
 ) : ViewModel() {
@@ -56,7 +54,7 @@ class InterestsViewModel @AssistedInject constructor(
 
     val uiState: StateFlow<InterestsUiState> = combine(
         selectedTopicId,
-        getFollowableTopics(sortBy = TopicSortField.NAME),
+        observeFollowableTopics(sortBy = TopicSortField.NAME),
         InterestsUiState::Interests,
     ).stateIn(
         scope = viewModelScope,
@@ -64,31 +62,21 @@ class InterestsViewModel @AssistedInject constructor(
         initialValue = InterestsUiState.Loading,
     )
 
-    fun followTopic(followedTopicId: String, followed: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setTopicIdFollowed(TopicId(followedTopicId), followed)
-        }
-    }
+    fun onEvent(event: InterestsEvent) {
+        when (event) {
+            is InterestsEvent.FollowTopic -> viewModelScope.launch {
+                followTopic(event.topicId, event.followed)
+            }
 
-    fun onTopicClick(topicId: String?) {
-        // TODO: This should modify the navigation state directly rather than just updating the
-        //  savedStateHandle
-        savedStateHandle[selectedTopicIdKey] = topicId
+            is InterestsEvent.SelectTopic ->
+                // TODO: This should modify the navigation state directly rather than just updating
+                //  the savedStateHandle
+                savedStateHandle[selectedTopicIdKey] = event.topicId
+        }
     }
 
     @AssistedFactory
     interface Factory {
         fun create(key: InterestsNavKey): InterestsViewModel
     }
-}
-
-sealed interface InterestsUiState {
-    data object Loading : InterestsUiState
-
-    data class Interests(
-        val selectedTopicId: String?,
-        val topics: List<FollowableTopic>,
-    ) : InterestsUiState
-
-    data object Empty : InterestsUiState
 }
