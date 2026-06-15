@@ -18,73 +18,59 @@ package com.google.samples.apps.nowinandroid.feature.topic.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.samples.apps.nowinandroid.core.common.result.Result
-import com.google.samples.apps.nowinandroid.core.common.result.asResult
-import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
-import com.google.samples.apps.nowinandroid.core.domain.repository.TopicsRepository
-import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
-import com.google.samples.apps.nowinandroid.core.domain.repository.UserNewsResourceRepository
+import com.google.samples.apps.nowinandroid.core.domain.usecase.BookmarkNewsResourceUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.MarkNewsResourceViewedUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveTopicNewsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
-import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
-import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = TopicViewModel.Factory::class)
 class TopicViewModel @AssistedInject constructor(
-    private val userDataRepository: UserDataRepository,
-    topicsRepository: TopicsRepository,
-    userNewsResourceRepository: UserNewsResourceRepository,
+    observeFollowableTopic: ObserveFollowableTopicUseCase,
+    observeTopicNews: ObserveTopicNewsUseCase,
+    private val followTopic: FollowTopicUseCase,
+    private val bookmarkNewsResource: BookmarkNewsResourceUseCase,
+    private val markNewsResourceViewed: MarkNewsResourceViewedUseCase,
     @Assisted val topicId: String,
 ) : ViewModel() {
-    val topicUiState: StateFlow<TopicUiState> = topicUiState(
-        topicId = topicId,
-        userDataRepository = userDataRepository,
-        topicsRepository = topicsRepository,
+
+    private val typedTopicId = TopicId(topicId)
+
+    val uiState: StateFlow<TopicUiState> = combine(
+        observeFollowableTopic(typedTopicId),
+        observeTopicNews(typedTopicId),
+        ::toUiState,
     )
+        .catch { emit(TopicUiState.Error) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = TopicUiState.Loading,
         )
 
-    val newsUiState: StateFlow<NewsUiState> = newsUiState(
-        topicId = topicId,
-        userDataRepository = userDataRepository,
-        userNewsResourceRepository = userNewsResourceRepository,
-    )
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = NewsUiState.Loading,
-        )
+    fun onEvent(event: TopicEvent) {
+        when (event) {
+            is TopicEvent.FollowTopicToggle ->
+                viewModelScope.launch { followTopic(typedTopicId, event.followed) }
 
-    fun followTopicToggle(followed: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setTopicIdFollowed(TopicId(topicId), followed)
-        }
-    }
+            is TopicEvent.BookmarkNews ->
+                viewModelScope.launch { bookmarkNewsResource(event.id, event.bookmarked) }
 
-    fun bookmarkNews(newsResourceId: String, bookmarked: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setNewsResourceBookmarked(NewsResourceId(newsResourceId), bookmarked)
-        }
-    }
-
-    fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setNewsResourceViewed(NewsResourceId(newsResourceId), viewed)
+            is TopicEvent.MarkNewsViewed ->
+                viewModelScope.launch { markNewsResourceViewed(event.id, viewed = true) }
         }
     }
 
@@ -96,78 +82,10 @@ class TopicViewModel @AssistedInject constructor(
     }
 }
 
-private fun topicUiState(
-    topicId: String,
-    userDataRepository: UserDataRepository,
-    topicsRepository: TopicsRepository,
-): Flow<TopicUiState> {
-    // Observe the followed topics, as they could change over time.
-    val followedTopicIds: Flow<Set<TopicId>> =
-        userDataRepository.userData
-            .map { it.followedTopics }
-
-    // Observe topic information
-    val topicStream: Flow<Topic> = topicsRepository.getTopic(
-        id = TopicId(topicId),
-    )
-
-    return combine(
-        followedTopicIds,
-        topicStream,
-        ::Pair,
-    )
-        .asResult()
-        .map { followedTopicToTopicResult ->
-            when (followedTopicToTopicResult) {
-                is Result.Success -> {
-                    val (followedTopics, topic) = followedTopicToTopicResult.data
-                    TopicUiState.Success(
-                        followableTopic = FollowableTopic(
-                            topic = topic,
-                            isFollowed = TopicId(topicId) in followedTopics,
-                        ),
-                    )
-                }
-
-                is Result.Loading -> TopicUiState.Loading
-                is Result.Error -> TopicUiState.Error
-            }
-        }
-}
-
-private fun newsUiState(
-    topicId: String,
-    userNewsResourceRepository: UserNewsResourceRepository,
-    userDataRepository: UserDataRepository,
-): Flow<NewsUiState> {
-    // Observe news
-    val newsStream: Flow<List<UserNewsResource>> = userNewsResourceRepository.observeAll(
-        NewsResourceQuery(filterTopicIds = setOf(element = TopicId(topicId))),
-    )
-
-    // Observe bookmarks
-    val bookmark: Flow<Set<NewsResourceId>> = userDataRepository.userData
-        .map { it.bookmarkedNewsResources }
-
-    return combine(newsStream, bookmark, ::Pair)
-        .asResult()
-        .map { newsToBookmarksResult ->
-            when (newsToBookmarksResult) {
-                is Result.Success -> NewsUiState.Success(newsToBookmarksResult.data.first)
-                is Result.Loading -> NewsUiState.Loading
-                is Result.Error -> NewsUiState.Error
-            }
-        }
-}
-
-sealed interface TopicUiState {
-    data class Success(val followableTopic: FollowableTopic) : TopicUiState
-    data object Error : TopicUiState
-    data object Loading : TopicUiState
-}
-
-sealed interface NewsUiState {
-    data class Success(val news: List<UserNewsResource>) : NewsUiState
-    data object Error : NewsUiState
-    data object Loading : NewsUiState
-}
+private fun toUiState(
+    followableTopic: FollowableTopic,
+    news: List<UserNewsResource>,
+): TopicUiState = TopicUiState.Success(
+    followableTopic = followableTopic,
+    news = news,
+)

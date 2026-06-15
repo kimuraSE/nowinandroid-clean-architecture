@@ -17,6 +17,11 @@
 package com.google.samples.apps.nowinandroid.feature.topic.impl
 
 import com.google.samples.apps.nowinandroid.core.data.repository.CompositeUserNewsResourceRepository
+import com.google.samples.apps.nowinandroid.core.domain.usecase.BookmarkNewsResourceUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.MarkNewsResourceViewedUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveTopicNewsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
@@ -27,8 +32,6 @@ import com.google.samples.apps.nowinandroid.core.testing.repository.TestTopicsRe
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
 import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -60,9 +63,11 @@ class TopicViewModelTest {
     @Before
     fun setup() {
         viewModel = TopicViewModel(
-            userDataRepository = userDataRepository,
-            topicsRepository = topicsRepository,
-            userNewsResourceRepository = userNewsResourceRepository,
+            observeFollowableTopic = ObserveFollowableTopicUseCase(topicsRepository, userDataRepository),
+            observeTopicNews = ObserveTopicNewsUseCase(userNewsResourceRepository),
+            followTopic = FollowTopicUseCase(userDataRepository),
+            bookmarkNewsResource = BookmarkNewsResourceUseCase(userDataRepository),
+            markNewsResourceViewed = MarkNewsResourceViewedUseCase(userDataRepository),
             topicId = testInputTopics[0].topic.id.value,
         )
     }
@@ -72,87 +77,41 @@ class TopicViewModelTest {
         assertEquals(testInputTopics[0].topic.id.value, viewModel.topicId)
 
     @Test
-    fun uiStateTopic_whenSuccess_matchesTopicFromRepository() = runTest {
-        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
+    fun uiState_whenInitialized_thenShowLoading() = runTest {
+        assertEquals(TopicUiState.Loading, viewModel.uiState.value)
+    }
+
+    @Test
+    fun uiState_whenTopicAndNewsLoaded_thenSuccessWithTopicAndNews() = runTest {
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
         topicsRepository.sendTopics(testInputTopics.map(FollowableTopic::topic))
+        // Topic 0 is not followed.
         userDataRepository.setFollowedTopicIds(setOf(testInputTopics[1].topic.id))
-        val item = viewModel.topicUiState.value
+        newsRepository.sendNewsResources(sampleNewsResources)
+
+        val item = viewModel.uiState.value
         assertIs<TopicUiState.Success>(item)
-
-        val topicFromRepository = topicsRepository.getTopic(
-            testInputTopics[0].topic.id,
-        ).first()
-
-        assertEquals(topicFromRepository, item.followableTopic.topic)
+        assertEquals(testInputTopics[0].topic, item.followableTopic.topic)
+        assertEquals(false, item.followableTopic.isFollowed)
+        assertEquals(1, item.news.size)
     }
 
     @Test
-    fun uiStateNews_whenInitialized_thenShowLoading() = runTest {
-        assertEquals(NewsUiState.Loading, viewModel.newsUiState.value)
-    }
+    fun uiState_whenFollowingTopic_thenShowUpdatedTopic() = runTest {
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
-    @Test
-    fun uiStateTopic_whenInitialized_thenShowLoading() = runTest {
-        assertEquals(TopicUiState.Loading, viewModel.topicUiState.value)
-    }
-
-    @Test
-    fun uiStateTopic_whenFollowedIdsSuccessAndTopicLoading_thenShowLoading() = runTest {
-        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
-
-        userDataRepository.setFollowedTopicIds(setOf(testInputTopics[1].topic.id))
-        assertEquals(TopicUiState.Loading, viewModel.topicUiState.value)
-    }
-
-    @Test
-    fun uiStateTopic_whenFollowedIdsSuccessAndTopicSuccess_thenTopicSuccessAndNewsLoading() =
-        runTest {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
-
-            topicsRepository.sendTopics(testInputTopics.map { it.topic })
-            userDataRepository.setFollowedTopicIds(setOf(testInputTopics[1].topic.id))
-            val topicUiState = viewModel.topicUiState.value
-            val newsUiState = viewModel.newsUiState.value
-
-            assertIs<TopicUiState.Success>(topicUiState)
-            assertIs<NewsUiState.Loading>(newsUiState)
-        }
-
-    @Test
-    fun uiStateTopic_whenFollowedIdsSuccessAndTopicSuccessAndNewsIsSuccess_thenAllSuccess() =
-        runTest {
-            backgroundScope.launch(UnconfinedTestDispatcher()) {
-                combine(
-                    viewModel.topicUiState,
-                    viewModel.newsUiState,
-                    ::Pair,
-                ).collect()
-            }
-            topicsRepository.sendTopics(testInputTopics.map { it.topic })
-            userDataRepository.setFollowedTopicIds(setOf(testInputTopics[1].topic.id))
-            newsRepository.sendNewsResources(sampleNewsResources)
-            val topicUiState = viewModel.topicUiState.value
-            val newsUiState = viewModel.newsUiState.value
-
-            assertIs<TopicUiState.Success>(topicUiState)
-            assertIs<NewsUiState.Success>(newsUiState)
-        }
-
-    @Test
-    fun uiStateTopic_whenFollowingTopic_thenShowUpdatedTopic() = runTest {
-        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.topicUiState.collect() }
-
-        topicsRepository.sendTopics(testInputTopics.map { it.topic })
+        topicsRepository.sendTopics(testInputTopics.map(FollowableTopic::topic))
         // Set which topic IDs are followed, not including 0.
         userDataRepository.setFollowedTopicIds(setOf(testInputTopics[1].topic.id))
+        newsRepository.sendNewsResources(sampleNewsResources)
 
-        viewModel.followTopicToggle(true)
+        viewModel.onEvent(TopicEvent.FollowTopicToggle(true))
 
-        assertEquals(
-            TopicUiState.Success(followableTopic = testOutputTopics[0]),
-            viewModel.topicUiState.value,
-        )
+        val item = viewModel.uiState.value
+        assertIs<TopicUiState.Success>(item)
+        assertEquals(testInputTopics[0].topic, item.followableTopic.topic)
+        assertEquals(true, item.followableTopic.isFollowed)
     }
 }
 
@@ -186,42 +145,6 @@ private val testInputTopics = listOf(
             imageUrl = TOPIC_IMAGE_URL,
         ),
         isFollowed = false,
-    ),
-    FollowableTopic(
-        Topic(
-            id = TopicId("2"),
-            name = TOPIC_3_NAME,
-            shortDescription = TOPIC_SHORT_DESC,
-            longDescription = TOPIC_LONG_DESC,
-            url = TOPIC_URL,
-            imageUrl = TOPIC_IMAGE_URL,
-        ),
-        isFollowed = false,
-    ),
-)
-
-private val testOutputTopics = listOf(
-    FollowableTopic(
-        Topic(
-            id = TopicId("0"),
-            name = TOPIC_1_NAME,
-            shortDescription = TOPIC_SHORT_DESC,
-            longDescription = TOPIC_LONG_DESC,
-            url = TOPIC_URL,
-            imageUrl = TOPIC_IMAGE_URL,
-        ),
-        isFollowed = true,
-    ),
-    FollowableTopic(
-        Topic(
-            id = TopicId("1"),
-            name = TOPIC_2_NAME,
-            shortDescription = TOPIC_SHORT_DESC,
-            longDescription = TOPIC_LONG_DESC,
-            url = TOPIC_URL,
-            imageUrl = TOPIC_IMAGE_URL,
-        ),
-        isFollowed = true,
     ),
     FollowableTopic(
         Topic(

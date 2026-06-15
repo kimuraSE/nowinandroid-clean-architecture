@@ -62,6 +62,7 @@ import com.google.samples.apps.nowinandroid.core.designsystem.component.scrollba
 import com.google.samples.apps.nowinandroid.core.designsystem.icon.NiaIcons
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import com.google.samples.apps.nowinandroid.core.ui.DevicePreviews
 import com.google.samples.apps.nowinandroid.core.ui.TrackScreenViewEvent
@@ -79,19 +80,15 @@ fun TopicScreen(
     modifier: Modifier = Modifier,
     viewModel: TopicViewModel = hiltViewModel(),
 ) {
-    val topicUiState: TopicUiState by viewModel.topicUiState.collectAsStateWithLifecycle()
-    val newsUiState: NewsUiState by viewModel.newsUiState.collectAsStateWithLifecycle()
+    val uiState: TopicUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     TrackScreenViewEvent(screenName = "Topic: ${viewModel.topicId}")
     TopicScreen(
-        topicUiState = topicUiState,
-        newsUiState = newsUiState,
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
         modifier = modifier.testTag("topic:${viewModel.topicId}"),
         showBackButton = showBackButton,
         onBackClick = onBackClick,
-        onFollowClick = viewModel::followTopicToggle,
-        onBookmarkChanged = viewModel::bookmarkNews,
-        onNewsResourceViewed = { viewModel.setNewsResourceViewed(it, true) },
         onTopicClick = onTopicClick,
     )
 }
@@ -99,14 +96,11 @@ fun TopicScreen(
 @VisibleForTesting
 @Composable
 internal fun TopicScreen(
-    topicUiState: TopicUiState,
-    newsUiState: NewsUiState,
+    uiState: TopicUiState,
+    onEvent: (TopicEvent) -> Unit,
     showBackButton: Boolean,
     onBackClick: () -> Unit,
-    onFollowClick: (Boolean) -> Unit,
     onTopicClick: (String) -> Unit,
-    onBookmarkChanged: (String, Boolean) -> Unit,
-    onNewsResourceViewed: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state = rememberLazyListState()
@@ -121,7 +115,7 @@ internal fun TopicScreen(
             item {
                 Spacer(Modifier.windowInsetsTopHeight(WindowInsets.safeDrawing))
             }
-            when (topicUiState) {
+            when (uiState) {
                 TopicUiState.Loading -> item {
                     NiaLoadingWheel(
                         modifier = modifier,
@@ -129,23 +123,25 @@ internal fun TopicScreen(
                     )
                 }
 
-                TopicUiState.Error -> TODO()
+                TopicUiState.Error -> item {
+                    Text(stringResource(id = TopicR.string.feature_topic_api_loading))
+                }
+
                 is TopicUiState.Success -> {
                     item {
                         TopicToolbar(
                             showBackButton = showBackButton,
                             onBackClick = onBackClick,
-                            onFollowClick = onFollowClick,
-                            uiState = topicUiState.followableTopic,
+                            onFollowClick = { onEvent(TopicEvent.FollowTopicToggle(it)) },
+                            uiState = uiState.followableTopic,
                         )
                     }
                     topicBody(
-                        name = topicUiState.followableTopic.topic.name,
-                        description = topicUiState.followableTopic.topic.longDescription,
-                        news = newsUiState,
-                        imageUrl = topicUiState.followableTopic.topic.imageUrl,
-                        onBookmarkChanged = onBookmarkChanged,
-                        onNewsResourceViewed = onNewsResourceViewed,
+                        name = uiState.followableTopic.topic.name,
+                        description = uiState.followableTopic.topic.longDescription,
+                        news = uiState.news,
+                        imageUrl = uiState.followableTopic.topic.imageUrl,
+                        onEvent = onEvent,
                         onTopicClick = onTopicClick,
                     )
                 }
@@ -154,7 +150,7 @@ internal fun TopicScreen(
                 Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeDrawing))
             }
         }
-        val itemsAvailable = topicItemsSize(topicUiState, newsUiState)
+        val itemsAvailable = topicItemsSize(uiState)
         val scrollbarState = state.scrollbarState(
             itemsAvailable = itemsAvailable,
         )
@@ -174,25 +170,19 @@ internal fun TopicScreen(
 }
 
 private fun topicItemsSize(
-    topicUiState: TopicUiState,
-    newsUiState: NewsUiState,
-) = when (topicUiState) {
+    uiState: TopicUiState,
+) = when (uiState) {
     TopicUiState.Error -> 0 // Nothing
     TopicUiState.Loading -> 1 // Loading bar
-    is TopicUiState.Success -> when (newsUiState) {
-        NewsUiState.Error -> 0 // Nothing
-        NewsUiState.Loading -> 1 // Loading bar
-        is NewsUiState.Success -> 2 + newsUiState.news.size // Toolbar, header
-    }
+    is TopicUiState.Success -> 2 + uiState.news.size // Toolbar, header
 }
 
 private fun LazyListScope.topicBody(
     name: String,
     description: String,
-    news: NewsUiState,
+    news: List<UserNewsResource>,
     imageUrl: String,
-    onBookmarkChanged: (String, Boolean) -> Unit,
-    onNewsResourceViewed: (String) -> Unit,
+    onEvent: (TopicEvent) -> Unit,
     onTopicClick: (String) -> Unit,
 ) {
     // TODO: Show icon if available
@@ -200,7 +190,7 @@ private fun LazyListScope.topicBody(
         TopicHeader(name, description, imageUrl)
     }
 
-    userNewsResourceCards(news, onBookmarkChanged, onNewsResourceViewed, onTopicClick)
+    userNewsResourceCards(news, onEvent, onTopicClick)
 }
 
 @Composable
@@ -229,30 +219,17 @@ private fun TopicHeader(name: String, description: String, imageUrl: String) {
 
 // TODO: Could/should this be replaced with [LazyGridScope.newsFeed]?
 private fun LazyListScope.userNewsResourceCards(
-    news: NewsUiState,
-    onBookmarkChanged: (String, Boolean) -> Unit,
-    onNewsResourceViewed: (String) -> Unit,
+    news: List<UserNewsResource>,
+    onEvent: (TopicEvent) -> Unit,
     onTopicClick: (String) -> Unit,
 ) {
-    when (news) {
-        is NewsUiState.Success -> {
-            userNewsResourceCardItems(
-                items = news.news,
-                onToggleBookmark = { onBookmarkChanged(it.id.value, !it.isSaved) },
-                onNewsResourceViewed = onNewsResourceViewed,
-                onTopicClick = onTopicClick,
-                itemModifier = Modifier.padding(24.dp),
-            )
-        }
-
-        is NewsUiState.Loading -> item {
-            NiaLoadingWheel(contentDesc = "Loading news") // TODO
-        }
-
-        else -> item {
-            Text("Error") // TODO
-        }
-    }
+    userNewsResourceCardItems(
+        items = news,
+        onToggleBookmark = { onEvent(TopicEvent.BookmarkNews(it.id, !it.isSaved)) },
+        onNewsResourceViewed = { onEvent(TopicEvent.MarkNewsViewed(NewsResourceId(it))) },
+        onTopicClick = onTopicClick,
+        itemModifier = Modifier.padding(24.dp),
+    )
 }
 
 @Preview
@@ -263,10 +240,9 @@ private fun TopicBodyPreview() {
             topicBody(
                 name = "Jetpack Compose",
                 description = "Lorem ipsum maximum",
-                news = NewsUiState.Success(emptyList()),
+                news = emptyList(),
                 imageUrl = "",
-                onBookmarkChanged = { _, _ -> },
-                onNewsResourceViewed = {},
+                onEvent = {},
                 onTopicClick = {},
             )
         }
@@ -325,13 +301,13 @@ fun TopicScreenPopulated(
     NiaTheme {
         NiaBackground {
             TopicScreen(
-                topicUiState = TopicUiState.Success(userNewsResources[0].followableTopics[0]),
-                newsUiState = NewsUiState.Success(userNewsResources),
+                uiState = TopicUiState.Success(
+                    followableTopic = userNewsResources[0].followableTopics[0],
+                    news = userNewsResources,
+                ),
+                onEvent = {},
                 showBackButton = true,
                 onBackClick = {},
-                onFollowClick = {},
-                onBookmarkChanged = { _, _ -> },
-                onNewsResourceViewed = {},
                 onTopicClick = {},
             )
         }
@@ -344,13 +320,10 @@ fun TopicScreenLoading() {
     NiaTheme {
         NiaBackground {
             TopicScreen(
-                topicUiState = TopicUiState.Loading,
-                newsUiState = NewsUiState.Loading,
+                uiState = TopicUiState.Loading,
+                onEvent = {},
                 showBackButton = true,
                 onBackClick = {},
-                onFollowClick = {},
-                onBookmarkChanged = { _, _ -> },
-                onNewsResourceViewed = {},
                 onTopicClick = {},
             )
         }
