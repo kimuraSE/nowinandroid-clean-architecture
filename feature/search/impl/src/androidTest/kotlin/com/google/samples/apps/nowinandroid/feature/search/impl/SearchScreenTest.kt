@@ -29,7 +29,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollToIndex
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig.DARK
-import com.google.samples.apps.nowinandroid.core.model.data.RecentSearchQuery
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand.ANDROID
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
@@ -59,8 +59,8 @@ class SearchScreenTest {
     private lateinit var searchNotReadyString: String
 
     private val userData: UserData = UserData(
-        bookmarkedNewsResources = setOf("1", "3"),
-        viewedNewsResources = setOf("1", "2", "4"),
+        bookmarkedNewsResources = setOf(NewsResourceId("1"), NewsResourceId("3")),
+        viewedNewsResources = setOf(NewsResourceId("1"), NewsResourceId("2"), NewsResourceId("4")),
         followedTopics = emptySet(),
         themeBrand = ANDROID,
         darkThemeConfig = DARK,
@@ -100,7 +100,11 @@ class SearchScreenTest {
     fun emptySearchResult_emptyScreenIsDisplayed() {
         composeTestRule.setContent {
             SearchScreen(
-                searchResultUiState = SearchResultUiState.Success(),
+                uiState = SearchUiState.Success(
+                    searchQuery = "",
+                    result = SearchResultState.Results(topics = emptyList(), newsResources = emptyList()),
+                    recentQueries = emptyList(),
+                ),
             )
         }
 
@@ -114,9 +118,10 @@ class SearchScreenTest {
         val recentSearches = listOf("kotlin")
         composeTestRule.setContent {
             SearchScreen(
-                searchResultUiState = SearchResultUiState.Success(),
-                recentSearchesUiState = RecentSearchQueriesUiState.Success(
-                    recentQueries = recentSearches.map(::RecentSearchQuery),
+                uiState = SearchUiState.Success(
+                    searchQuery = "",
+                    result = SearchResultState.Results(topics = emptyList(), newsResources = emptyList()),
+                    recentQueries = recentSearches,
                 ),
             )
         }
@@ -136,7 +141,14 @@ class SearchScreenTest {
     fun searchResultWithTopics_allTopicsAreVisible_followButtonsVisibleForTheNumOfFollowedTopics() {
         composeTestRule.setContent {
             SearchScreen(
-                searchResultUiState = SearchResultUiState.Success(topics = followableTopicTestData),
+                uiState = SearchUiState.Success(
+                    searchQuery = "",
+                    result = SearchResultState.Results(
+                        topics = followableTopicTestData,
+                        newsResources = emptyList(),
+                    ),
+                    recentQueries = emptyList(),
+                ),
             )
         }
 
@@ -168,13 +180,18 @@ class SearchScreenTest {
     fun searchResultWithNewsResources_firstNewsResourcesIsVisible() {
         composeTestRule.setContent {
             SearchScreen(
-                searchResultUiState = SearchResultUiState.Success(
-                    newsResources = newsResourcesTestData.map {
-                        UserNewsResource(
-                            newsResource = it,
-                            userData = userData,
-                        )
-                    },
+                uiState = SearchUiState.Success(
+                    searchQuery = "",
+                    result = SearchResultState.Results(
+                        topics = emptyList(),
+                        newsResources = newsResourcesTestData.map {
+                            UserNewsResource(
+                                newsResource = it,
+                                userData = userData,
+                            )
+                        },
+                    ),
+                    recentQueries = emptyList(),
                 ),
             )
         }
@@ -192,9 +209,10 @@ class SearchScreenTest {
         val recentSearches = listOf("kotlin", "testing")
         composeTestRule.setContent {
             SearchScreen(
-                searchResultUiState = SearchResultUiState.EmptyQuery,
-                recentSearchesUiState = RecentSearchQueriesUiState.Success(
-                    recentQueries = recentSearches.map(::RecentSearchQuery),
+                uiState = SearchUiState.Success(
+                    searchQuery = "",
+                    result = SearchResultState.EmptyQuery,
+                    recentQueries = recentSearches,
                 ),
             )
         }
@@ -214,7 +232,11 @@ class SearchScreenTest {
     fun searchNotReady_verifySearchNotReadyMessageIsVisible() {
         composeTestRule.setContent {
             SearchScreen(
-                searchResultUiState = SearchResultUiState.SearchNotReady,
+                uiState = SearchUiState.Success(
+                    searchQuery = "",
+                    result = SearchResultState.NotReady,
+                    recentQueries = emptyList(),
+                ),
             )
         }
 

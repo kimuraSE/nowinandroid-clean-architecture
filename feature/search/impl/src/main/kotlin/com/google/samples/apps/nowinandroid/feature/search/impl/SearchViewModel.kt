@@ -22,18 +22,22 @@ import androidx.lifecycle.viewModelScope
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsEvent
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsEvent.Param
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsHelper
-import com.google.samples.apps.nowinandroid.core.domain.repository.RecentSearchRepository
-import com.google.samples.apps.nowinandroid.core.domain.repository.SearchContentsRepository
-import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
+import com.google.samples.apps.nowinandroid.core.domain.usecase.BookmarkNewsResourceUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ClearRecentSearchesUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.MarkNewsResourceViewedUseCase
 import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveRecentSearchQueriesUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveSearchContentsCountUseCase
 import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveSearchResultsUseCase
-import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
-import com.google.samples.apps.nowinandroid.core.model.data.TopicId
+import com.google.samples.apps.nowinandroid.core.domain.usecase.SaveRecentSearchUseCase
+import com.google.samples.apps.nowinandroid.core.model.data.RecentSearchQuery
 import com.google.samples.apps.nowinandroid.core.model.data.UserSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -43,96 +47,92 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    getSearchContentsUseCase: ObserveSearchResultsUseCase,
-    recentSearchQueriesUseCase: ObserveRecentSearchQueriesUseCase,
-    private val searchContentsRepository: SearchContentsRepository,
-    private val recentSearchRepository: RecentSearchRepository,
-    private val userDataRepository: UserDataRepository,
+    observeSearchResults: ObserveSearchResultsUseCase,
+    observeRecentSearchQueries: ObserveRecentSearchQueriesUseCase,
+    observeSearchContentsCount: ObserveSearchContentsCountUseCase,
+    private val saveRecentSearch: SaveRecentSearchUseCase,
+    private val clearRecentSearches: ClearRecentSearchesUseCase,
+    private val followTopic: FollowTopicUseCase,
+    private val bookmarkNewsResource: BookmarkNewsResourceUseCase,
+    private val markNewsResourceViewed: MarkNewsResourceViewedUseCase,
     private val savedStateHandle: SavedStateHandle,
     private val analyticsHelper: AnalyticsHelper,
 ) : ViewModel() {
 
-    val searchQuery = savedStateHandle.getStateFlow(key = SEARCH_QUERY, initialValue = "")
+    private val searchQuery = savedStateHandle.getStateFlow(key = SEARCH_QUERY, initialValue = "")
 
-    val searchResultUiState: StateFlow<SearchResultUiState> =
-        searchContentsRepository.getSearchContentsCount()
+    private val resultState: Flow<SearchResultState> =
+        observeSearchContentsCount()
             .flatMapLatest { totalCount ->
                 if (totalCount < SEARCH_MIN_FTS_ENTITY_COUNT) {
-                    flowOf(SearchResultUiState.SearchNotReady)
+                    flowOf(SearchResultState.NotReady)
                 } else {
                     searchQuery.flatMapLatest { query ->
                         if (query.trim().length < SEARCH_QUERY_MIN_LENGTH) {
-                            flowOf(SearchResultUiState.EmptyQuery)
+                            flowOf(SearchResultState.EmptyQuery)
                         } else {
-                            getSearchContentsUseCase(query)
-                                // Not using .asResult() here, because it emits Loading state every
-                                // time the user types a letter in the search box, which flickers the screen.
-                                .map<UserSearchResult, SearchResultUiState> { data ->
-                                    SearchResultUiState.Success(
+                            // Not using .asResult() here, because it emits Loading state every
+                            // time the user types a letter in the search box, which flickers the screen.
+                            observeSearchResults(query)
+                                .map<UserSearchResult, SearchResultState> { data ->
+                                    SearchResultState.Results(
                                         topics = data.topics,
                                         newsResources = data.newsResources,
                                     )
                                 }
-                                .catch { emit(SearchResultUiState.LoadFailed) }
                         }
                     }
                 }
-            }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = SearchResultUiState.Loading,
-            )
+            }
 
-    val recentSearchQueriesUiState: StateFlow<RecentSearchQueriesUiState> =
-        recentSearchQueriesUseCase()
-            .map(RecentSearchQueriesUiState::Success)
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = RecentSearchQueriesUiState.Loading,
-            )
+    val uiState: StateFlow<SearchUiState> = combine<String, SearchResultState, List<String>, SearchUiState>(
+        searchQuery,
+        resultState,
+        observeRecentSearchQueries().map { queries -> queries.map(RecentSearchQuery::query) },
+    ) { query, result, recentQueries ->
+        SearchUiState.Success(
+            searchQuery = query,
+            result = result,
+            recentQueries = recentQueries,
+        )
+    }
+        .catch { emit(SearchUiState.Error) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = SearchUiState.Loading,
+        )
 
-    fun onSearchQueryChanged(query: String) {
-        savedStateHandle[SEARCH_QUERY] = query
+    fun onEvent(event: SearchEvent) {
+        when (event) {
+            is SearchEvent.QueryChanged ->
+                savedStateHandle[SEARCH_QUERY] = event.query
+
+            is SearchEvent.SearchTriggered ->
+                onSearchTriggered(event.query)
+
+            SearchEvent.ClearRecentSearches ->
+                viewModelScope.launch { clearRecentSearches() }
+
+            is SearchEvent.FollowTopic ->
+                viewModelScope.launch { followTopic(event.topicId, event.followed) }
+
+            is SearchEvent.BookmarkNews ->
+                viewModelScope.launch { bookmarkNewsResource(event.id, event.bookmarked) }
+
+            is SearchEvent.MarkNewsViewed ->
+                viewModelScope.launch { markNewsResourceViewed(event.id, viewed = true) }
+        }
     }
 
     /**
-     * Called when the search action is explicitly triggered by the user. For example, when the
-     * search icon is tapped in the IME or when the enter key is pressed in the search text field.
-     *
-     * The search results are displayed on the fly as the user types, but to explicitly save the
-     * search query in the search text field, defining this method.
+     * 検索が明示的に実行されたとき（IME の検索キーや Enter）に呼ぶ。入力中も結果は逐次表示されるが、
+     * このメソッドで明示的に検索クエリを最近の検索として保存する。
      */
-    fun onSearchTriggered(query: String) {
+    private fun onSearchTriggered(query: String) {
         if (query.isBlank()) return
-        viewModelScope.launch {
-            recentSearchRepository.insertOrReplaceRecentSearch(searchQuery = query)
-        }
+        viewModelScope.launch { saveRecentSearch(query) }
         analyticsHelper.logEventSearchTriggered(query = query)
-    }
-
-    fun clearRecentSearches() {
-        viewModelScope.launch {
-            recentSearchRepository.clearRecentSearches()
-        }
-    }
-
-    fun setNewsResourceBookmarked(newsResourceId: String, isChecked: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setNewsResourceBookmarked(NewsResourceId(newsResourceId), isChecked)
-        }
-    }
-
-    fun followTopic(followedTopicId: String, followed: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setTopicIdFollowed(TopicId(followedTopicId), followed)
-        }
-    }
-
-    fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setNewsResourceViewed(NewsResourceId(newsResourceId), viewed)
-        }
     }
 }
 
@@ -144,7 +144,7 @@ private fun AnalyticsHelper.logEventSearchTriggered(query: String) =
         ),
     )
 
-/** Minimum length where search query is considered as [SearchResultUiState.EmptyQuery] */
+/** Minimum length where search query is considered as [SearchResultState.EmptyQuery] */
 private const val SEARCH_QUERY_MIN_LENGTH = 2
 
 /** Minimum number of the fts table's entity count where it's considered as search is not ready */

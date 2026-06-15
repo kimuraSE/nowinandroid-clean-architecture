@@ -86,6 +86,8 @@ import com.google.samples.apps.nowinandroid.core.designsystem.component.scrollba
 import com.google.samples.apps.nowinandroid.core.designsystem.icon.NiaIcons
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import com.google.samples.apps.nowinandroid.core.ui.DevicePreviews
 import com.google.samples.apps.nowinandroid.core.ui.InterestsItem
@@ -103,20 +105,11 @@ internal fun SearchScreen(
     modifier: Modifier = Modifier,
     searchViewModel: SearchViewModel = hiltViewModel(),
 ) {
-    val recentSearchQueriesUiState by searchViewModel.recentSearchQueriesUiState.collectAsStateWithLifecycle()
-    val searchResultUiState by searchViewModel.searchResultUiState.collectAsStateWithLifecycle()
-    val searchQuery by searchViewModel.searchQuery.collectAsStateWithLifecycle()
+    val uiState by searchViewModel.uiState.collectAsStateWithLifecycle()
     SearchScreen(
         modifier = modifier,
-        searchQuery = searchQuery,
-        recentSearchesUiState = recentSearchQueriesUiState,
-        searchResultUiState = searchResultUiState,
-        onSearchQueryChanged = searchViewModel::onSearchQueryChanged,
-        onSearchTriggered = searchViewModel::onSearchTriggered,
-        onClearRecentSearches = searchViewModel::clearRecentSearches,
-        onNewsResourcesCheckedChanged = searchViewModel::setNewsResourceBookmarked,
-        onNewsResourceViewed = { searchViewModel.setNewsResourceViewed(it, true) },
-        onFollowButtonClick = searchViewModel::followTopic,
+        uiState = uiState,
+        onEvent = searchViewModel::onEvent,
         onBackClick = onBackClick,
         onInterestsClick = onInterestsClick,
         onTopicClick = onTopicClick,
@@ -125,75 +118,67 @@ internal fun SearchScreen(
 
 @Composable
 internal fun SearchScreen(
+    uiState: SearchUiState = SearchUiState.Loading,
+    onEvent: (SearchEvent) -> Unit = {},
     modifier: Modifier = Modifier,
-    searchQuery: String = "",
-    recentSearchesUiState: RecentSearchQueriesUiState = RecentSearchQueriesUiState.Loading,
-    searchResultUiState: SearchResultUiState = SearchResultUiState.Loading,
-    onSearchQueryChanged: (String) -> Unit = {},
-    onSearchTriggered: (String) -> Unit = {},
-    onClearRecentSearches: () -> Unit = {},
-    onNewsResourcesCheckedChanged: (String, Boolean) -> Unit = { _, _ -> },
-    onNewsResourceViewed: (String) -> Unit = {},
-    onFollowButtonClick: (String, Boolean) -> Unit = { _, _ -> },
     onBackClick: () -> Unit = {},
     onInterestsClick: () -> Unit = {},
     onTopicClick: (String) -> Unit = {},
 ) {
     TrackScreenViewEvent(screenName = "Search")
+    val searchQuery = (uiState as? SearchUiState.Success)?.searchQuery.orEmpty()
     Column(modifier = modifier) {
         Spacer(Modifier.windowInsetsTopHeight(WindowInsets.safeDrawing))
         SearchToolbar(
             onBackClick = onBackClick,
-            onSearchQueryChanged = onSearchQueryChanged,
-            onSearchTriggered = onSearchTriggered,
+            onSearchQueryChanged = { onEvent(SearchEvent.QueryChanged(it)) },
+            onSearchTriggered = { onEvent(SearchEvent.SearchTriggered(it)) },
             searchQuery = searchQuery,
         )
-        when (searchResultUiState) {
-            SearchResultUiState.Loading,
-            SearchResultUiState.LoadFailed,
+        when (uiState) {
+            SearchUiState.Loading,
+            SearchUiState.Error,
             -> Unit
 
-            SearchResultUiState.SearchNotReady -> SearchNotReadyBody()
-            SearchResultUiState.EmptyQuery,
-            -> {
-                if (recentSearchesUiState is RecentSearchQueriesUiState.Success) {
-                    RecentSearchesBody(
-                        onClearRecentSearches = onClearRecentSearches,
-                        onRecentSearchClicked = {
-                            onSearchQueryChanged(it)
-                            onSearchTriggered(it)
-                        },
-                        recentSearchQueries = recentSearchesUiState.recentQueries.map { it.query },
-                    )
-                }
-            }
+            is SearchUiState.Success -> when (val result = uiState.result) {
+                SearchResultState.NotReady -> SearchNotReadyBody()
 
-            is SearchResultUiState.Success -> {
-                if (searchResultUiState.isEmpty()) {
+                SearchResultState.EmptyQuery -> RecentSearchesBody(
+                    onClearRecentSearches = { onEvent(SearchEvent.ClearRecentSearches) },
+                    onRecentSearchClicked = {
+                        onEvent(SearchEvent.QueryChanged(it))
+                        onEvent(SearchEvent.SearchTriggered(it))
+                    },
+                    recentSearchQueries = uiState.recentQueries,
+                )
+
+                is SearchResultState.Results -> if (result.isEmpty()) {
                     EmptySearchResultBody(
                         searchQuery = searchQuery,
                         onInterestsClick = onInterestsClick,
                     )
-                    if (recentSearchesUiState is RecentSearchQueriesUiState.Success) {
-                        RecentSearchesBody(
-                            onClearRecentSearches = onClearRecentSearches,
-                            onRecentSearchClicked = {
-                                onSearchQueryChanged(it)
-                                onSearchTriggered(it)
-                            },
-                            recentSearchQueries = recentSearchesUiState.recentQueries.map { it.query },
-                        )
-                    }
+                    RecentSearchesBody(
+                        onClearRecentSearches = { onEvent(SearchEvent.ClearRecentSearches) },
+                        onRecentSearchClicked = {
+                            onEvent(SearchEvent.QueryChanged(it))
+                            onEvent(SearchEvent.SearchTriggered(it))
+                        },
+                        recentSearchQueries = uiState.recentQueries,
+                    )
                 } else {
                     SearchResultBody(
                         searchQuery = searchQuery,
-                        topics = searchResultUiState.topics,
-                        newsResources = searchResultUiState.newsResources,
-                        onSearchTriggered = onSearchTriggered,
+                        topics = result.topics,
+                        newsResources = result.newsResources,
+                        onSearchTriggered = { onEvent(SearchEvent.SearchTriggered(it)) },
                         onTopicClick = onTopicClick,
-                        onNewsResourcesCheckedChanged = onNewsResourcesCheckedChanged,
-                        onNewsResourceViewed = onNewsResourceViewed,
-                        onFollowButtonClick = onFollowButtonClick,
+                        onNewsResourcesCheckedChanged = { id, bookmarked ->
+                            onEvent(SearchEvent.BookmarkNews(NewsResourceId(id), bookmarked))
+                        },
+                        onNewsResourceViewed = { onEvent(SearchEvent.MarkNewsViewed(NewsResourceId(it))) },
+                        onFollowButtonClick = { id, followed ->
+                            onEvent(SearchEvent.FollowTopic(TopicId(id), followed))
+                        },
                     )
                 }
             }
@@ -597,9 +582,9 @@ private fun SearchNotReadyBodyPreview() {
 @Composable
 private fun SearchScreenPreview(
     @PreviewParameter(SearchUiStatePreviewParameterProvider::class)
-    searchResultUiState: SearchResultUiState,
+    uiState: SearchUiState,
 ) {
     NiaTheme {
-        SearchScreen(searchResultUiState = searchResultUiState)
+        SearchScreen(uiState = uiState)
     }
 }
