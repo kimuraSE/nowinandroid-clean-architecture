@@ -23,12 +23,17 @@ import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsEvent
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsEvent.Param
 import com.google.samples.apps.nowinandroid.core.analytics.AnalyticsHelper
 import com.google.samples.apps.nowinandroid.core.domain.repository.NewsResourceQuery
-import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
-import com.google.samples.apps.nowinandroid.core.domain.repository.UserNewsResourceRepository
+import com.google.samples.apps.nowinandroid.core.domain.usecase.BookmarkNewsResourceUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.DismissOnboardingUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.MarkNewsResourceViewedUseCase
 import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicsUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowedNewsUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveUserDataUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveUserNewsUseCase
 import com.google.samples.apps.nowinandroid.core.domain.util.SyncManager
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
-import com.google.samples.apps.nowinandroid.core.model.data.TopicId
+import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import com.google.samples.apps.nowinandroid.core.notifications.DEEP_LINK_NEWS_RESOURCE_ID_KEY
 import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,45 +53,51 @@ class ForYouViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     syncManager: SyncManager,
     private val analyticsHelper: AnalyticsHelper,
-    private val userDataRepository: UserDataRepository,
-    userNewsResourceRepository: UserNewsResourceRepository,
-    getFollowableTopics: ObserveFollowableTopicsUseCase,
+    observeUserData: ObserveUserDataUseCase,
+    observeFollowableTopics: ObserveFollowableTopicsUseCase,
+    observeFollowedNews: ObserveFollowedNewsUseCase,
+    observeUserNews: ObserveUserNewsUseCase,
+    private val followTopic: FollowTopicUseCase,
+    private val bookmarkNewsResource: BookmarkNewsResourceUseCase,
+    private val markNewsResourceViewed: MarkNewsResourceViewedUseCase,
+    private val dismissOnboarding: DismissOnboardingUseCase,
 ) : ViewModel() {
 
     private val shouldShowOnboarding: Flow<Boolean> =
-        userDataRepository.userData.map { it.shouldShowOnboarding() }
+        observeUserData().map { it.shouldShowOnboarding() }
 
-    val deepLinkedNewsResource = savedStateHandle.getStateFlow<String?>(
-        key = DEEP_LINK_NEWS_RESOURCE_ID_KEY,
-        null,
-    )
-        .flatMapLatest { newsResourceId ->
-            if (newsResourceId == null) {
-                flowOf(emptyList())
-            } else {
-                userNewsResourceRepository.observeAll(
-                    NewsResourceQuery(
-                        filterNewsIds = setOf(NewsResourceId(newsResourceId)),
-                    ),
-                )
-            }
-        }
-        .map { it.firstOrNull() }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = null,
+    private val deepLinkedNewsResource: StateFlow<UserNewsResource?> =
+        savedStateHandle.getStateFlow<String?>(
+            key = DEEP_LINK_NEWS_RESOURCE_ID_KEY,
+            null,
         )
+            .flatMapLatest { newsResourceId ->
+                if (newsResourceId == null) {
+                    flowOf(emptyList())
+                } else {
+                    observeUserNews(
+                        NewsResourceQuery(
+                            filterNewsIds = setOf(NewsResourceId(newsResourceId)),
+                        ),
+                    )
+                }
+            }
+            .map { it.firstOrNull() }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = null,
+            )
 
-    val isSyncing = syncManager.isSyncing
+    private val isSyncing: StateFlow<Boolean> = syncManager.isSyncing
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = false,
         )
 
-    val feedState: StateFlow<NewsFeedUiState> =
-        userNewsResourceRepository.observeAllForFollowedTopics()
+    private val feed: StateFlow<NewsFeedUiState> =
+        observeFollowedNews()
             .map(NewsFeedUiState::Success)
             .stateIn(
                 scope = viewModelScope,
@@ -94,10 +105,10 @@ class ForYouViewModel @Inject constructor(
                 initialValue = NewsFeedUiState.Loading,
             )
 
-    val onboardingUiState: StateFlow<OnboardingUiState> =
+    private val onboarding: StateFlow<OnboardingUiState> =
         combine(
             shouldShowOnboarding,
-            getFollowableTopics(),
+            observeFollowableTopics(),
         ) { shouldShowOnboarding, topics ->
             if (shouldShowOnboarding) {
                 OnboardingUiState.Shown(topics = topics)
@@ -111,40 +122,52 @@ class ForYouViewModel @Inject constructor(
                 initialValue = OnboardingUiState.Loading,
             )
 
-    fun updateTopicSelection(topicId: String, isChecked: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setTopicIdFollowed(TopicId(topicId), isChecked)
-        }
-    }
-
-    fun updateNewsResourceSaved(newsResourceId: String, isChecked: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setNewsResourceBookmarked(NewsResourceId(newsResourceId), isChecked)
-        }
-    }
-
-    fun setNewsResourceViewed(newsResourceId: String, viewed: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setNewsResourceViewed(NewsResourceId(newsResourceId), viewed)
-        }
-    }
-
-    fun onDeepLinkOpened(newsResourceId: String) {
-        if (newsResourceId == deepLinkedNewsResource.value?.id?.value) {
-            savedStateHandle[DEEP_LINK_NEWS_RESOURCE_ID_KEY] = null
-        }
-        analyticsHelper.logNewsDeepLinkOpen(newsResourceId = newsResourceId)
-        viewModelScope.launch {
-            userDataRepository.setNewsResourceViewed(
-                newsResourceId = NewsResourceId(newsResourceId),
-                viewed = true,
+    val uiState: StateFlow<ForYouUiState> =
+        combine<Boolean, OnboardingUiState, NewsFeedUiState, UserNewsResource?, ForYouUiState>(
+            isSyncing,
+            onboarding,
+            feed,
+            deepLinkedNewsResource,
+        ) { isSyncing, onboarding, feed, deepLinkedUserNewsResource ->
+            ForYouUiState.Success(
+                isSyncing = isSyncing,
+                onboarding = onboarding,
+                feed = feed,
+                deepLinkedUserNewsResource = deepLinkedUserNewsResource,
             )
         }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = ForYouUiState.Loading,
+            )
+
+    fun onEvent(event: ForYouEvent) {
+        when (event) {
+            is ForYouEvent.UpdateTopicSelection ->
+                viewModelScope.launch { followTopic(event.topicId, event.followed) }
+
+            is ForYouEvent.UpdateNewsResourceSaved ->
+                viewModelScope.launch { bookmarkNewsResource(event.newsResourceId, event.bookmarked) }
+
+            is ForYouEvent.MarkNewsViewed ->
+                viewModelScope.launch { markNewsResourceViewed(event.newsResourceId, viewed = true) }
+
+            ForYouEvent.DismissOnboarding ->
+                viewModelScope.launch { dismissOnboarding() }
+
+            is ForYouEvent.DeepLinkOpened ->
+                onDeepLinkOpened(event.newsResourceId)
+        }
     }
 
-    fun dismissOnboarding() {
+    private fun onDeepLinkOpened(newsResourceId: NewsResourceId) {
+        if (newsResourceId == deepLinkedNewsResource.value?.id) {
+            savedStateHandle[DEEP_LINK_NEWS_RESOURCE_ID_KEY] = null
+        }
+        analyticsHelper.logNewsDeepLinkOpen(newsResourceId = newsResourceId.value)
         viewModelScope.launch {
-            userDataRepository.setShouldHideOnboarding(true)
+            markNewsResourceViewed(newsResourceId, viewed = true)
         }
     }
 }

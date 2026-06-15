@@ -95,6 +95,8 @@ import com.google.samples.apps.nowinandroid.core.designsystem.component.scrollba
 import com.google.samples.apps.nowinandroid.core.designsystem.component.scrollbar.scrollbarState
 import com.google.samples.apps.nowinandroid.core.designsystem.icon.NiaIcons
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
+import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
+import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
 import com.google.samples.apps.nowinandroid.core.ui.DevicePreviews
 import com.google.samples.apps.nowinandroid.core.ui.NewsFeedUiState
@@ -111,22 +113,24 @@ fun ForYouScreen(
     modifier: Modifier = Modifier,
     viewModel: ForYouViewModel = hiltViewModel(),
 ) {
-    val onboardingUiState by viewModel.onboardingUiState.collectAsStateWithLifecycle()
-    val feedState by viewModel.feedState.collectAsStateWithLifecycle()
-    val isSyncing by viewModel.isSyncing.collectAsStateWithLifecycle()
-    val deepLinkedUserNewsResource by viewModel.deepLinkedNewsResource.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val successState = uiState as? ForYouUiState.Success
 
     ForYouScreen(
-        isSyncing = isSyncing,
-        onboardingUiState = onboardingUiState,
-        feedState = feedState,
-        deepLinkedUserNewsResource = deepLinkedUserNewsResource,
-        onTopicCheckedChanged = viewModel::updateTopicSelection,
-        onDeepLinkOpened = viewModel::onDeepLinkOpened,
+        isSyncing = successState?.isSyncing ?: false,
+        onboardingUiState = successState?.onboarding ?: OnboardingUiState.Loading,
+        feedState = successState?.feed ?: NewsFeedUiState.Loading,
+        deepLinkedUserNewsResource = successState?.deepLinkedUserNewsResource,
+        onTopicCheckedChanged = { topicId, followed ->
+            viewModel.onEvent(ForYouEvent.UpdateTopicSelection(TopicId(topicId), followed))
+        },
+        onDeepLinkOpened = { viewModel.onEvent(ForYouEvent.DeepLinkOpened(NewsResourceId(it))) },
         onTopicClick = onTopicClick,
-        saveFollowedTopics = viewModel::dismissOnboarding,
-        onNewsResourcesCheckedChanged = viewModel::updateNewsResourceSaved,
-        onNewsResourceViewed = { viewModel.setNewsResourceViewed(it, true) },
+        saveFollowedTopics = { viewModel.onEvent(ForYouEvent.DismissOnboarding) },
+        onNewsResourcesCheckedChanged = { newsResourceId, bookmarked ->
+            viewModel.onEvent(ForYouEvent.UpdateNewsResourceSaved(NewsResourceId(newsResourceId), bookmarked))
+        },
+        onNewsResourceViewed = { viewModel.onEvent(ForYouEvent.MarkNewsViewed(NewsResourceId(it))) },
         modifier = modifier,
     )
 }
