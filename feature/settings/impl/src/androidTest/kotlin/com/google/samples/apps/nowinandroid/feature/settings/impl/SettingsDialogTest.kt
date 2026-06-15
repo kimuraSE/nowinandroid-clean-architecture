@@ -39,11 +39,9 @@ class SettingsDialogTest {
     fun whenLoading_showsLoadingText() {
         composeTestRule.setContent {
             SettingsDialog(
-                settingsUiState = Loading,
+                uiState = Loading,
                 onDismiss = {},
-                onChangeDynamicColorPreference = {},
-                onChangeThemeBrand = {},
-                onChangeDarkThemeConfig = {},
+                onEvent = {},
             )
         }
 
@@ -56,7 +54,7 @@ class SettingsDialogTest {
     fun whenStateIsSuccess_allDefaultSettingsAreDisplayed() {
         composeTestRule.setContent {
             SettingsDialog(
-                settingsUiState = Success(
+                uiState = Success(
                     UserEditableSettings(
                         brand = ANDROID,
                         useDynamicColor = false,
@@ -64,9 +62,7 @@ class SettingsDialogTest {
                     ),
                 ),
                 onDismiss = { },
-                onChangeDynamicColorPreference = {},
-                onChangeThemeBrand = {},
-                onChangeDarkThemeConfig = {},
+                onEvent = {},
             )
         }
 
@@ -88,7 +84,7 @@ class SettingsDialogTest {
     fun whenStateIsSuccess_supportsDynamicColor_usesDefaultBrand_DynamicColorOptionIsDisplayed() {
         composeTestRule.setContent {
             SettingsDialog(
-                settingsUiState = Success(
+                uiState = Success(
                     UserEditableSettings(
                         brand = DEFAULT,
                         darkThemeConfig = DARK,
@@ -97,9 +93,7 @@ class SettingsDialogTest {
                 ),
                 supportDynamicColor = true,
                 onDismiss = {},
-                onChangeDynamicColorPreference = {},
-                onChangeThemeBrand = {},
-                onChangeDarkThemeConfig = {},
+                onEvent = {},
             )
         }
 
@@ -115,7 +109,7 @@ class SettingsDialogTest {
     fun whenStateIsSuccess_notSupportDynamicColor_DynamicColorOptionIsNotDisplayed() {
         composeTestRule.setContent {
             SettingsDialog(
-                settingsUiState = Success(
+                uiState = Success(
                     UserEditableSettings(
                         brand = ANDROID,
                         darkThemeConfig = DARK,
@@ -123,9 +117,7 @@ class SettingsDialogTest {
                     ),
                 ),
                 onDismiss = {},
-                onChangeDynamicColorPreference = {},
-                onChangeThemeBrand = {},
-                onChangeDarkThemeConfig = {},
+                onEvent = {},
             )
         }
 
@@ -139,7 +131,7 @@ class SettingsDialogTest {
     fun whenStateIsSuccess_usesAndroidBrand_DynamicColorOptionIsNotDisplayed() {
         composeTestRule.setContent {
             SettingsDialog(
-                settingsUiState = Success(
+                uiState = Success(
                     UserEditableSettings(
                         brand = ANDROID,
                         darkThemeConfig = DARK,
@@ -147,9 +139,7 @@ class SettingsDialogTest {
                     ),
                 ),
                 onDismiss = {},
-                onChangeDynamicColorPreference = {},
-                onChangeThemeBrand = {},
-                onChangeDarkThemeConfig = {},
+                onEvent = {},
             )
         }
 
@@ -163,7 +153,7 @@ class SettingsDialogTest {
     fun whenStateIsSuccess_allLinksAreDisplayed() {
         composeTestRule.setContent {
             SettingsDialog(
-                settingsUiState = Success(
+                uiState = Success(
                     UserEditableSettings(
                         brand = ANDROID,
                         darkThemeConfig = DARK,
@@ -171,9 +161,7 @@ class SettingsDialogTest {
                     ),
                 ),
                 onDismiss = {},
-                onChangeDynamicColorPreference = {},
-                onChangeThemeBrand = {},
-                onChangeDarkThemeConfig = {},
+                onEvent = {},
             )
         }
 

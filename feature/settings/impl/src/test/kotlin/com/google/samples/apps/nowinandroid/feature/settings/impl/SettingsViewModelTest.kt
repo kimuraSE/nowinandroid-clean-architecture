@@ -16,6 +16,10 @@
 
 package com.google.samples.apps.nowinandroid.feature.settings.impl
 
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveUserDataUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.SetDarkThemeConfigUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.SetDynamicColorPreferenceUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.SetThemeBrandUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig.DARK
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand.ANDROID
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
@@ -30,6 +34,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 
 class SettingsViewModelTest {
 
@@ -42,17 +47,22 @@ class SettingsViewModelTest {
 
     @Before
     fun setup() {
-        viewModel = SettingsViewModel(userDataRepository)
+        viewModel = SettingsViewModel(
+            observeUserData = ObserveUserDataUseCase(userDataRepository),
+            setThemeBrand = SetThemeBrandUseCase(userDataRepository),
+            setDarkThemeConfig = SetDarkThemeConfigUseCase(userDataRepository),
+            setDynamicColorPreference = SetDynamicColorPreferenceUseCase(userDataRepository),
+        )
     }
 
     @Test
     fun stateIsInitiallyLoading() = runTest {
-        assertEquals(Loading, viewModel.settingsUiState.value)
+        assertEquals(Loading, viewModel.uiState.value)
     }
 
     @Test
     fun stateIsSuccessAfterUserDataLoaded() = runTest {
-        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.settingsUiState.collect() }
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
 
         userDataRepository.setThemeBrand(ANDROID)
         userDataRepository.setDarkThemeConfig(DARK)
@@ -65,7 +75,18 @@ class SettingsViewModelTest {
                     useDynamicColor = false,
                 ),
             ),
-            viewModel.settingsUiState.value,
+            viewModel.uiState.value,
         )
+    }
+
+    @Test
+    fun onEvent_changeThemeBrand_updatesState() = runTest {
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
+
+        viewModel.onEvent(SettingsEvent.ChangeThemeBrand(ANDROID))
+
+        val state = viewModel.uiState.value
+        assertIs<Success>(state)
+        assertEquals(ANDROID, state.settings.brand)
     }
 }

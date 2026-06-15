@@ -58,15 +58,14 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.samples.apps.nowinandroid.core.designsystem.component.NiaTextButton
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.supportsDynamicTheming
-import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig.DARK
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig.FOLLOW_SYSTEM
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig.LIGHT
-import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand.ANDROID
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand.DEFAULT
 import com.google.samples.apps.nowinandroid.core.ui.TrackScreenViewEvent
 import com.google.samples.apps.nowinandroid.feature.settings.impl.R.string
+import com.google.samples.apps.nowinandroid.feature.settings.impl.SettingsUiState.Error
 import com.google.samples.apps.nowinandroid.feature.settings.impl.SettingsUiState.Loading
 import com.google.samples.apps.nowinandroid.feature.settings.impl.SettingsUiState.Success
 
@@ -75,24 +74,20 @@ fun SettingsDialog(
     onDismiss: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
-    val settingsUiState by viewModel.settingsUiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     SettingsDialog(
         onDismiss = onDismiss,
-        settingsUiState = settingsUiState,
-        onChangeThemeBrand = viewModel::updateThemeBrand,
-        onChangeDynamicColorPreference = viewModel::updateDynamicColorPreference,
-        onChangeDarkThemeConfig = viewModel::updateDarkThemeConfig,
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
     )
 }
 
 @Composable
 fun SettingsDialog(
-    settingsUiState: SettingsUiState,
+    uiState: SettingsUiState,
     supportDynamicColor: Boolean = supportsDynamicTheming(),
     onDismiss: () -> Unit,
-    onChangeThemeBrand: (themeBrand: ThemeBrand) -> Unit,
-    onChangeDynamicColorPreference: (useDynamicColor: Boolean) -> Unit,
-    onChangeDarkThemeConfig: (darkThemeConfig: DarkThemeConfig) -> Unit,
+    onEvent: (SettingsEvent) -> Unit,
 ) {
     val configuration = LocalConfiguration.current
 
@@ -116,8 +111,15 @@ fun SettingsDialog(
         text = {
             HorizontalDivider()
             Column(Modifier.verticalScroll(rememberScrollState())) {
-                when (settingsUiState) {
+                when (uiState) {
                     Loading -> {
+                        Text(
+                            text = stringResource(string.feature_settings_impl_loading),
+                            modifier = Modifier.padding(vertical = 16.dp),
+                        )
+                    }
+
+                    Error -> {
                         Text(
                             text = stringResource(string.feature_settings_impl_loading),
                             modifier = Modifier.padding(vertical = 16.dp),
@@ -126,11 +128,9 @@ fun SettingsDialog(
 
                     is Success -> {
                         SettingsPanel(
-                            settings = settingsUiState.settings,
+                            settings = uiState.settings,
                             supportDynamicColor = supportDynamicColor,
-                            onChangeThemeBrand = onChangeThemeBrand,
-                            onChangeDynamicColorPreference = onChangeDynamicColorPreference,
-                            onChangeDarkThemeConfig = onChangeDarkThemeConfig,
+                            onEvent = onEvent,
                         )
                     }
                 }
@@ -159,21 +159,19 @@ fun SettingsDialog(
 private fun ColumnScope.SettingsPanel(
     settings: UserEditableSettings,
     supportDynamicColor: Boolean,
-    onChangeThemeBrand: (themeBrand: ThemeBrand) -> Unit,
-    onChangeDynamicColorPreference: (useDynamicColor: Boolean) -> Unit,
-    onChangeDarkThemeConfig: (darkThemeConfig: DarkThemeConfig) -> Unit,
+    onEvent: (SettingsEvent) -> Unit,
 ) {
     SettingsDialogSectionTitle(text = stringResource(string.feature_settings_impl_theme))
     Column(Modifier.selectableGroup()) {
         SettingsDialogThemeChooserRow(
             text = stringResource(string.feature_settings_impl_brand_default),
             selected = settings.brand == DEFAULT,
-            onClick = { onChangeThemeBrand(DEFAULT) },
+            onClick = { onEvent(SettingsEvent.ChangeThemeBrand(DEFAULT)) },
         )
         SettingsDialogThemeChooserRow(
             text = stringResource(string.feature_settings_impl_brand_android),
             selected = settings.brand == ANDROID,
-            onClick = { onChangeThemeBrand(ANDROID) },
+            onClick = { onEvent(SettingsEvent.ChangeThemeBrand(ANDROID)) },
         )
     }
     AnimatedVisibility(visible = settings.brand == DEFAULT && supportDynamicColor) {
@@ -183,12 +181,12 @@ private fun ColumnScope.SettingsPanel(
                 SettingsDialogThemeChooserRow(
                     text = stringResource(string.feature_settings_impl_dynamic_color_yes),
                     selected = settings.useDynamicColor,
-                    onClick = { onChangeDynamicColorPreference(true) },
+                    onClick = { onEvent(SettingsEvent.ChangeDynamicColorPreference(true)) },
                 )
                 SettingsDialogThemeChooserRow(
                     text = stringResource(string.feature_settings_impl_dynamic_color_no),
                     selected = !settings.useDynamicColor,
-                    onClick = { onChangeDynamicColorPreference(false) },
+                    onClick = { onEvent(SettingsEvent.ChangeDynamicColorPreference(false)) },
                 )
             }
         }
@@ -198,17 +196,17 @@ private fun ColumnScope.SettingsPanel(
         SettingsDialogThemeChooserRow(
             text = stringResource(string.feature_settings_impl_dark_mode_config_system_default),
             selected = settings.darkThemeConfig == FOLLOW_SYSTEM,
-            onClick = { onChangeDarkThemeConfig(FOLLOW_SYSTEM) },
+            onClick = { onEvent(SettingsEvent.ChangeDarkThemeConfig(FOLLOW_SYSTEM)) },
         )
         SettingsDialogThemeChooserRow(
             text = stringResource(string.feature_settings_impl_dark_mode_config_light),
             selected = settings.darkThemeConfig == LIGHT,
-            onClick = { onChangeDarkThemeConfig(LIGHT) },
+            onClick = { onEvent(SettingsEvent.ChangeDarkThemeConfig(LIGHT)) },
         )
         SettingsDialogThemeChooserRow(
             text = stringResource(string.feature_settings_impl_dark_mode_config_dark),
             selected = settings.darkThemeConfig == DARK,
-            onClick = { onChangeDarkThemeConfig(DARK) },
+            onClick = { onEvent(SettingsEvent.ChangeDarkThemeConfig(DARK)) },
         )
     }
 }
@@ -291,16 +289,14 @@ private fun PreviewSettingsDialog() {
     NiaTheme {
         SettingsDialog(
             onDismiss = {},
-            settingsUiState = Success(
+            uiState = Success(
                 UserEditableSettings(
                     brand = DEFAULT,
                     darkThemeConfig = FOLLOW_SYSTEM,
                     useDynamicColor = false,
                 ),
             ),
-            onChangeThemeBrand = {},
-            onChangeDynamicColorPreference = {},
-            onChangeDarkThemeConfig = {},
+            onEvent = {},
         )
     }
 }
@@ -311,10 +307,8 @@ private fun PreviewSettingsDialogLoading() {
     NiaTheme {
         SettingsDialog(
             onDismiss = {},
-            settingsUiState = Loading,
-            onChangeThemeBrand = {},
-            onChangeDynamicColorPreference = {},
-            onChangeDarkThemeConfig = {},
+            uiState = Loading,
+            onEvent = {},
         )
     }
 }

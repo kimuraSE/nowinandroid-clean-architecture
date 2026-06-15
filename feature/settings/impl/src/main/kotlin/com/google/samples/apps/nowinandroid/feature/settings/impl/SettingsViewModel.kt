@@ -18,14 +18,15 @@ package com.google.samples.apps.nowinandroid.feature.settings.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
-import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig
-import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand
-import com.google.samples.apps.nowinandroid.feature.settings.impl.SettingsUiState.Loading
-import com.google.samples.apps.nowinandroid.feature.settings.impl.SettingsUiState.Success
+import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveUserDataUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.SetDarkThemeConfigUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.SetDynamicColorPreferenceUseCase
+import com.google.samples.apps.nowinandroid.core.domain.usecase.SetThemeBrandUseCase
+import com.google.samples.apps.nowinandroid.core.model.data.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -34,12 +35,16 @@ import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val userDataRepository: UserDataRepository,
+    observeUserData: ObserveUserDataUseCase,
+    private val setThemeBrand: SetThemeBrandUseCase,
+    private val setDarkThemeConfig: SetDarkThemeConfigUseCase,
+    private val setDynamicColorPreference: SetDynamicColorPreferenceUseCase,
 ) : ViewModel() {
-    val settingsUiState: StateFlow<SettingsUiState> =
-        userDataRepository.userData
-            .map { userData ->
-                Success(
+
+    val uiState: StateFlow<SettingsUiState> =
+        observeUserData()
+            .map<UserData, SettingsUiState> { userData ->
+                SettingsUiState.Success(
                     settings = UserEditableSettings(
                         brand = userData.themeBrand,
                         useDynamicColor = userData.useDynamicColor,
@@ -47,41 +52,23 @@ class SettingsViewModel @Inject constructor(
                     ),
                 )
             }
+            .catch { emit(SettingsUiState.Error) }
             .stateIn(
                 scope = viewModelScope,
                 started = WhileSubscribed(5.seconds.inWholeMilliseconds),
-                initialValue = Loading,
+                initialValue = SettingsUiState.Loading,
             )
 
-    fun updateThemeBrand(themeBrand: ThemeBrand) {
-        viewModelScope.launch {
-            userDataRepository.setThemeBrand(themeBrand)
+    fun onEvent(event: SettingsEvent) {
+        when (event) {
+            is SettingsEvent.ChangeThemeBrand ->
+                viewModelScope.launch { setThemeBrand(event.themeBrand) }
+
+            is SettingsEvent.ChangeDarkThemeConfig ->
+                viewModelScope.launch { setDarkThemeConfig(event.darkThemeConfig) }
+
+            is SettingsEvent.ChangeDynamicColorPreference ->
+                viewModelScope.launch { setDynamicColorPreference(event.useDynamicColor) }
         }
     }
-
-    fun updateDarkThemeConfig(darkThemeConfig: DarkThemeConfig) {
-        viewModelScope.launch {
-            userDataRepository.setDarkThemeConfig(darkThemeConfig)
-        }
-    }
-
-    fun updateDynamicColorPreference(useDynamicColor: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.setDynamicColorPreference(useDynamicColor)
-        }
-    }
-}
-
-/**
- * Represents the settings which the user can edit within the app.
- */
-data class UserEditableSettings(
-    val brand: ThemeBrand,
-    val useDynamicColor: Boolean,
-    val darkThemeConfig: DarkThemeConfig,
-)
-
-sealed interface SettingsUiState {
-    data object Loading : SettingsUiState
-    data class Success(val settings: UserEditableSettings) : SettingsUiState
 }
