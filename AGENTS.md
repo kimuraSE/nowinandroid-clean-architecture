@@ -6,20 +6,30 @@ available, and bookmark items.
 
 ## Architecture
 
-This project is a modern Android application that follows the official architecture guidance from Google. It is a reactive, single-activity app that uses the following:
+This project **rearchitects** the original Google **Now in Android** sample into **Clean Architecture + MVVM + Unidirectional Data Flow (UDF) + Domain-Driven Design (DDD)**, intended as a reference sample for future Android app development. The canonical specs live in [`docs/architecture/`](docs/architecture/) and **take precedence over the code** when they disagree:
 
--   **UI:** Built entirely with Jetpack Compose, including Material 3 components and adaptive layouts for different screen sizes.
--   **State Management:** Unidirectional Data Flow (UDF) is implemented using Kotlin Coroutines and `Flow`s. `ViewModel`s act as state holders, exposing UI state as streams of data.
--   **Dependency Injection:** Hilt is used for dependency injection throughout the app, simplifying the management of dependencies and improving testability.
--   **Navigation:** Navigation is handled by Jetpack Navigation 2 for Compose, allowing for a declarative and type-safe way to navigate between screens.
--   **Data:** The data layer is implemented using the repository pattern.
-    -   **Local Data:** Room and DataStore are used for local data persistence.
-    -   **Remote Data:** Retrofit and OkHttp are used for fetching data from the network.
--   **Background Processing:** WorkManager is used for deferrable background tasks.
+- [docs/architecture/clean-architecture.md](docs/architecture/clean-architecture.md) — layers, dependency rules, UseCase / Repository / presentation (UDF) / Mapper / testing conventions
+- [docs/architecture/ddd.md](docs/architecture/ddd.md) — Entity / Value Object / aggregate / ubiquitous language
+- [docs/architecture/components.md](docs/architecture/components.md) — target module dependency graph and the 19 UseCases
+
+Key rules:
+
+-   **Layers:** `core/model` (Entity layer) ← `core/domain` (UseCases + Repository interfaces) ← `core/data` (implementations). Presentation (`feature/*`, `app`) depends only on `core/domain`, never on `core/data` (except `app`, which only wires DI).
+-   **Dependencies always point inward** toward `core/model`, a standalone pure-Kotlin module that depends on nothing.
+-   **Always go through a UseCase:** `ViewModel`s never touch repositories directly. UseCases expose only `operator fun invoke` — observers as `operator fun invoke(...): Flow<T>`, mutations as `suspend operator fun invoke(...): Result<Unit>`.
+-   **UDF:** one `UiState` (sealed interface: `Loading` / `Success` / `Error`) and one `onEvent(event)` per screen. A `ViewModel` exposes exactly `uiState: StateFlow<XxxUiState>` and `fun onEvent(XxxEvent)`.
+-   **Value objects:** IDs are `@JvmInline value class` (`TopicId`, `NewsResourceId`).
+-   **Mappers:** `toDomain()` / `toEntity()` / `toNetwork()` extension functions live in the data-side modules; `core/model` and `core/domain` never know the data models (Room entities, DTOs, Proto).
+
+The supporting infrastructure is unchanged from the original sample: Jetpack Compose (Material 3) for UI, Hilt for dependency injection, Navigation for Compose, Room and DataStore for local data, Retrofit and OkHttp for remote data, and WorkManager for deferrable background work.
 
 ## Modules
 
 The main Android app lives in the `app/` folder. Feature modules live in `feature/` and core and shared modules in `core/`.
+
+-   Each feature is split into `feature/<name>/api` (public contracts such as navigation `NavKey`s) and `feature/<name>/impl` (`Screen` + `ViewModel`).
+-   The domain is split across `core/model` (Entities / Value Objects) and `core/domain` (UseCases + Repository interfaces); `core/data` (with `core/database`, `core/network`, `core/datastore`) holds the implementations.
+-   Build conventions live in `build-logic/convention/` (e.g. `nowinandroid.android.feature.impl`); shared feature dependencies are injected there.
 
 ## Commands to Build & Test
 

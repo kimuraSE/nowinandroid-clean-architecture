@@ -47,9 +47,23 @@ together to create a complete app.
 
 # Architecture
 
-The **Now in Android** app follows the
-[official architecture guidance](https://developer.android.com/topic/architecture) 
-and is described in detail in the
+This repository **rearchitects** the original
+[official architecture guidance](https://developer.android.com/topic/architecture) version of
+**Now in Android** into **Clean Architecture + MVVM + Unidirectional Data Flow (UDF) + Domain-Driven
+Design (DDD)**, as a reference sample for future Android development.
+
+The canonical architecture specs are:
+
+- [Clean Architecture conventions](docs/architecture/clean-architecture.md) — layers, dependency rules, UseCase / Repository / presentation (UDF) / Mapper / testing conventions
+- [DDD conventions](docs/architecture/ddd.md) — Entity / Value Object / aggregate / ubiquitous language
+- [Components](docs/architecture/components.md) — target module dependency graph and the 19 UseCases
+
+In short: `core/model` (Entities) ← `core/domain` (UseCases + Repository interfaces) ← `core/data`
+(implementations); presentation (`feature/*`, `app`) depends only on `core/domain` and drives each
+screen through a single `UiState` + `onEvent`. `ViewModel`s reach the domain only through UseCases,
+never repositories directly.
+
+The original Google design that this project is based on is still described in the
 [architecture learning journey](docs/ArchitectureLearningJourney.md).
 
 # Modularization
@@ -105,9 +119,9 @@ Examples:
 
 - There are `Test` implementations of each repository, which implement the normal, full repository
   interface and also provide test-only hooks.
-  `ViewModel` tests use these `Test` repositories, and thus can use the test-only hooks to
-  manipulate the state of the `Test` repository and verify the resulting behavior, instead of
-  checking that specific repository methods were called.
+  `ViewModel` tests construct the production `UseCase`s over these `Test` repositories, drive the
+  screen through `onEvent`, and assert the resulting `uiState` transitions — using the test-only
+  hooks to set up repository state instead of checking that specific repository methods were called.
 
 To run the tests execute the following gradle tasks: 
 
