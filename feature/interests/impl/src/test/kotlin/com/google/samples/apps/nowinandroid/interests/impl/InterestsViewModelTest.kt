@@ -18,14 +18,14 @@ package com.google.samples.apps.nowinandroid.interests.impl
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.testing.invoke
-import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestTopicsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
 import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
+import com.google.samples.apps.nowinandroid.core.usecase.FollowTopicUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveFollowableTopicsUseCase
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsEvent
 import com.google.samples.apps.nowinandroid.feature.interests.impl.InterestsUiState

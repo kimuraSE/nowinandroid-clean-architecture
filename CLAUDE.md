@@ -16,21 +16,21 @@
 
 詳細は上記ドキュメント参照。最低限守るルール:
 
-- **層**: `core/model`（Entity 層）← `core/domain`（UseCase + Repository インターフェース）← `core/data`（実装）。presentation（`feature/*`・`app`）は `core/domain` のみに依存し、`core/data` を直接参照しない（DI 配線を行う `app` を除く）
-- **依存方向**: 常に最内の `core/model` へ向ける。`core/model` は独立モジュールとして維持する（`core/domain` へ吸収しない）
+- **層**: `core/model`（Entity 層）← `core/usecase`（UseCase + Repository インターフェース）← `core/data`（実装）。presentation（`feature/*`・`app`）は `core/usecase` のみに依存し、`core/data` を直接参照しない（DI 配線を行う `app` を除く）
+- **依存方向**: 常に最内の `core/model` へ向ける。`core/model` は独立モジュールとして維持する（`core/usecase` へ吸収しない）
 - **UseCase 経由**: ViewModel は Repository を直接参照せず、必ず UseCase を経由する。公開メソッドは `operator fun invoke` のみ
   - 観察系 `Observe〜UseCase`: `operator fun invoke(...): Flow<T>`
   - 操作系（動詞始まり）: `suspend operator fun invoke(...): Result<Unit>`（エラーは `kotlin.Result`）
 - **UDF**: 画面ごとに単一 `UiState`（sealed interface: Loading / Success / Error）と単一 `onEvent(event)`。ViewModel が公開するのは `uiState: StateFlow<XxxUiState>` と `fun onEvent(XxxEvent)` の 2 つのみ
 - **VO**: ID は `@JvmInline value class`（`TopicId` / `NewsResourceId`）
-- **Mapper**: data 側モジュールに `toDomain()` / `toEntity()` / `toNetwork()` の拡張関数として置く。`core/model` / `core/domain` は data のモデルを知らない
+- **Mapper**: data 側モジュールに `toDomain()` / `toEntity()` / `toNetwork()` の拡張関数として置く。`core/model` / `core/usecase` は data のモデルを知らない
 - **DDD**: 戦術的パターン中心（Entity / VO / 集約 / ユビキタス言語）。境界づけコンテキスト分割・ドメインイベントは適用しない
 
 ## リアーキの進め方
 
 [components.md §5](./docs/architecture/components.md) の順序で進める:
 
-1. **基盤（依存逆転）**: Repository インターフェースを `core/domain` へ移動、`core/domain` を `core/model` のみ依存に、`core/data` を `core/domain` 依存に。ID の value class 化、`UserData` への振る舞い追加
+1. **基盤（依存逆転）**: Repository インターフェースを `core/usecase` へ移動、`core/usecase` を `core/model` のみ依存に、`core/data` を `core/usecase` 依存に。ID の value class 化、`UserData` への振る舞い追加
 2. **UseCase 層**: 19 UseCase を作成し単体テスト追加。既存 3 UseCase（`GetFollowableTopicsUseCase` 等）はリネーム
 3. **feature 順次変換**: bookmarks → settings → topic → interests → search → foryou の順に UiState + onEvent 化
 4. **同期**: AGENT.md / AGENTS.md / README を新アーキの説明に更新

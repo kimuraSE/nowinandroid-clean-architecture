@@ -24,11 +24,11 @@ import com.google.samples.apps.nowinandroid.core.data.test.repository.FakeTopics
 import com.google.samples.apps.nowinandroid.core.data.test.repository.FakeUserDataRepository
 import com.google.samples.apps.nowinandroid.core.data.util.NetworkMonitor
 import com.google.samples.apps.nowinandroid.core.data.util.TimeZoneMonitor
-import com.google.samples.apps.nowinandroid.core.domain.repository.NewsRepository
-import com.google.samples.apps.nowinandroid.core.domain.repository.RecentSearchRepository
-import com.google.samples.apps.nowinandroid.core.domain.repository.SearchContentsRepository
-import com.google.samples.apps.nowinandroid.core.domain.repository.TopicsRepository
-import com.google.samples.apps.nowinandroid.core.domain.repository.UserDataRepository
+import com.google.samples.apps.nowinandroid.core.usecase.repository.NewsRepository
+import com.google.samples.apps.nowinandroid.core.usecase.repository.RecentSearchRepository
+import com.google.samples.apps.nowinandroid.core.usecase.repository.SearchContentsRepository
+import com.google.samples.apps.nowinandroid.core.usecase.repository.TopicsRepository
+import com.google.samples.apps.nowinandroid.core.usecase.repository.UserDataRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.components.SingletonComponent

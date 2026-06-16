@@ -21,7 +21,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkInfo.State
 import androidx.work.WorkManager
-import com.google.samples.apps.nowinandroid.core.domain.util.SyncManager
+import com.google.samples.apps.nowinandroid.core.usecase.util.SyncManager
 import com.google.samples.apps.nowinandroid.sync.initializers.SYNC_WORK_NAME
 import com.google.samples.apps.nowinandroid.sync.workers.SyncWorker
 import dagger.hilt.android.qualifiers.ApplicationContext

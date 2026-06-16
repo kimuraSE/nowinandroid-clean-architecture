@@ -33,11 +33,11 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import androidx.test.espresso.Espresso
 import com.google.samples.apps.nowinandroid.core.designsystem.theme.NiaTheme
-import com.google.samples.apps.nowinandroid.core.domain.repository.TopicsRepository
 import com.google.samples.apps.nowinandroid.core.model.data.Topic
 import com.google.samples.apps.nowinandroid.core.navigation.Navigator
 import com.google.samples.apps.nowinandroid.core.navigation.rememberNavigationState
 import com.google.samples.apps.nowinandroid.core.navigation.toEntries
+import com.google.samples.apps.nowinandroid.core.usecase.repository.TopicsRepository
 import com.google.samples.apps.nowinandroid.feature.interests.api.R
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
 import com.google.samples.apps.nowinandroid.feature.interests.impl.LIST_PANE_TEST_TAG

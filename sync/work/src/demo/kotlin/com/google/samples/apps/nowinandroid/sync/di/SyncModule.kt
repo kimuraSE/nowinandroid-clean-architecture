@@ -16,7 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.sync.di
 
-import com.google.samples.apps.nowinandroid.core.domain.util.SyncManager
+import com.google.samples.apps.nowinandroid.core.usecase.util.SyncManager
 import com.google.samples.apps.nowinandroid.sync.status.StubSyncSubscriber
 import com.google.samples.apps.nowinandroid.sync.status.SyncSubscriber
 import com.google.samples.apps.nowinandroid.sync.status.WorkManagerSyncManager

@@ -17,11 +17,6 @@
 package com.google.samples.apps.nowinandroid.feature.topic.impl
 
 import com.google.samples.apps.nowinandroid.core.data.repository.CompositeUserNewsResourceRepository
-import com.google.samples.apps.nowinandroid.core.domain.usecase.BookmarkNewsResourceUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.MarkNewsResourceViewedUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveTopicNewsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResource
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
@@ -31,6 +26,11 @@ import com.google.samples.apps.nowinandroid.core.testing.repository.TestNewsRepo
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestTopicsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
 import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
+import com.google.samples.apps.nowinandroid.core.usecase.BookmarkNewsResourceUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.FollowTopicUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.MarkNewsResourceViewedUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveFollowableTopicUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveTopicNewsUseCase
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

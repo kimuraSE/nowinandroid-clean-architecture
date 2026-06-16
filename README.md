@@ -58,8 +58,8 @@ The canonical architecture specs are:
 - [DDD conventions](docs/architecture/ddd.md) — Entity / Value Object / aggregate / ubiquitous language
 - [Components](docs/architecture/components.md) — target module dependency graph and the 19 UseCases
 
-In short: `core/model` (Entities) ← `core/domain` (UseCases + Repository interfaces) ← `core/data`
-(implementations); presentation (`feature/*`, `app`) depends only on `core/domain` and drives each
+In short: `core/model` (Entities) ← `core/usecase` (UseCases + Repository interfaces) ← `core/data`
+(implementations); presentation (`feature/*`, `app`) depends only on `core/usecase` and drives each
 screen through a single `UiState` + `onEvent`. `ViewModel`s reach the domain only through UseCases,
 never repositories directly.
 

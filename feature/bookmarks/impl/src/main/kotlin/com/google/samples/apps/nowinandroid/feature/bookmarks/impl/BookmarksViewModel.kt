@@ -18,11 +18,11 @@ package com.google.samples.apps.nowinandroid.feature.bookmarks.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.samples.apps.nowinandroid.core.domain.usecase.BookmarkNewsResourceUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.MarkNewsResourceViewedUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveBookmarkedNewsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
+import com.google.samples.apps.nowinandroid.core.usecase.BookmarkNewsResourceUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.MarkNewsResourceViewedUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveBookmarkedNewsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -49,7 +49,7 @@ class BookmarksViewModel @Inject constructor(
         lastRemovedBookmarkId,
         ::toUiState, // ← 関数自体を値として渡して、ラムダと同じ役割をさせている。::toUiState は { a, b -> toUiState(a, b) }
     )
-        .catch { emit(BookmarksUiState.Error) } //emit = Flow が値を1つ下流に送り出すこと（何度でも起きる。受け手は collect）
+        .catch { emit(BookmarksUiState.Error) } // emit = Flow が値を1つ下流に送り出すこと（何度でも起きる。受け手は collect）
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),

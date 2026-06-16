@@ -108,7 +108,7 @@ internal fun BookmarksScreen(
     val bookmarkRemovedMessage = stringResource(id = R.string.feature_bookmarks_api_removed)
     val undoText = stringResource(id = R.string.feature_bookmarks_api_undo)
 
-    //取り消しSnackBarを出すべきか(Successかつフラグがtrueのときのみ)
+    // 取り消しSnackBarを出すべきか(Successかつフラグがtrueのときのみ)
     val shouldDisplayUndoBookmark =
         (uiState as? BookmarksUiState.Success)?.shouldShowUndoBookmark == true
 

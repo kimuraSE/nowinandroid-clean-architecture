@@ -19,9 +19,9 @@ package com.google.samples.apps.nowinandroid.feature.interests.impl
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicsUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.TopicSortField
+import com.google.samples.apps.nowinandroid.core.usecase.FollowTopicUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveFollowableTopicsUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.TopicSortField
 import com.google.samples.apps.nowinandroid.feature.interests.api.navigation.InterestsNavKey
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

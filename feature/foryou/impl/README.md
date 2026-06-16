@@ -32,7 +32,7 @@ graph TB
     :core:datastore[datastore]:::android-library
     :core:datastore-proto[datastore-proto]:::jvm-library
     :core:designsystem[designsystem]:::android-library
-    :core:domain[domain]:::android-library
+    :core:usecase[domain]:::android-library
     :core:model[model]:::jvm-library
     :core:navigation[navigation]:::android-library
     :core:network[network]:::android-library
@@ -50,8 +50,8 @@ graph TB
   :core:datastore -.-> :core:common
   :core:datastore --> :core:datastore-proto
   :core:datastore --> :core:model
-  :core:domain --> :core:data
-  :core:domain --> :core:model
+  :core:usecase --> :core:data
+  :core:usecase --> :core:model
   :core:network --> :core:common
   :core:network --> :core:model
   :core:notifications -.-> :core:common
@@ -61,7 +61,7 @@ graph TB
   :core:ui --> :core:model
   :feature:foryou:api --> :core:navigation
   :feature:foryou:impl -.-> :core:designsystem
-  :feature:foryou:impl -.-> :core:domain
+  :feature:foryou:impl -.-> :core:usecase
   :feature:foryou:impl -.-> :core:notifications
   :feature:foryou:impl -.-> :core:ui
   :feature:foryou:impl -.-> :feature:foryou:api

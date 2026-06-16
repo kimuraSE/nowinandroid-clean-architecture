@@ -18,14 +18,6 @@ package com.google.samples.apps.nowinandroid.feature.search.impl
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.samples.apps.nowinandroid.core.analytics.NoOpAnalyticsHelper
-import com.google.samples.apps.nowinandroid.core.domain.usecase.BookmarkNewsResourceUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ClearRecentSearchesUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.MarkNewsResourceViewedUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveRecentSearchQueriesUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveSearchContentsCountUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveSearchResultsUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.SaveRecentSearchUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.NewsResourceId
 import com.google.samples.apps.nowinandroid.core.testing.data.newsResourcesTestData
 import com.google.samples.apps.nowinandroid.core.testing.data.topicsTestData
@@ -34,6 +26,14 @@ import com.google.samples.apps.nowinandroid.core.testing.repository.TestSearchCo
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.emptyUserData
 import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
+import com.google.samples.apps.nowinandroid.core.usecase.BookmarkNewsResourceUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ClearRecentSearchesUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.FollowTopicUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.MarkNewsResourceViewedUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveRecentSearchQueriesUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveSearchContentsCountUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveSearchResultsUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.SaveRecentSearchUseCase
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

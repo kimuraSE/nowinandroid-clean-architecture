@@ -9,30 +9,30 @@
 | 層 | 責務 | 配置 |
 |---|---|---|
 | **domain / Entity** | Entity・Value Object・読み取り用ビュー。振る舞いを持つドメインモデル（Enterprise Business Rules） | `core/model` |
-| **domain / UseCase** | UseCase・Repository インターフェース（Application Business Rules） | `core/domain` |
+| **domain / UseCase** | UseCase・Repository インターフェース（Application Business Rules） | `core/usecase` |
 | **data** | Repository 実装、データソース（Room / Retrofit / DataStore）、データモデル ↔ ドメインモデルの変換 | `core/data`, `core/database`, `core/network`, `core/datastore` |
 | **presentation** | Compose UI と ViewModel。UDF（単一データフロー）で画面状態を管理 | `feature/*`, `app` |
 
 Clean Architecture 原典の同心円との対応:
 
 - **Entities（最内・Enterprise Business Rules）= `core/model`**。Entity・Value Object・集約・読み取りビューを置く。振る舞いを持つドメインモデル（詳細は ddd.md）
-- **Use Cases（Application Business Rules）= `core/domain`**。UseCase と Repository インターフェースを置き、`core/model` のみに依存する
+- **Use Cases（Application Business Rules）= `core/usecase`**。UseCase と Repository インターフェースを置き、`core/model` のみに依存する
 
-> `core/model` は独立モジュールとして維持する（`core/domain` への吸収はしない）。理由: `core/database` / `core/network` / `core/datastore` などデータソースモジュールはマッパーのためにドメインモデルの型だけを必要とする。これらを UseCase を含む `core/domain` に依存させると最下層が Application Business Rules を知る層違反になるため、Entity 層を `core/model` として切り出す。
+> `core/model` は独立モジュールとして維持する（`core/usecase` への吸収はしない）。理由: `core/database` / `core/network` / `core/datastore` などデータソースモジュールはマッパーのためにドメインモデルの型だけを必要とする。これらを UseCase を含む `core/usecase` に依存させると最下層が Application Business Rules を知る層違反になるため、Entity 層を `core/model` として切り出す。
 
 ## 2. 依存ルール
 
 **依存は常に内側（Entity）へ向ける。最内の `core/model` は誰にも依存しない。**
 
 ```
-presentation ──→ core/domain ──→ core/model ←── data
+presentation ──→ core/usecase ──→ core/model ←── data
 ```
 
 - `core/model` は他のモジュールに依存しない純 Kotlin（kotlinx-datetime のみ許可）
-- `core/domain` は `core/model` にのみ依存する。Android フレームワークに依存しない（純 Kotlin。kotlinx-coroutines / javax.inject を許可）
-- Repository は **インターフェースを `core/domain` に置き、実装を `core/data` に置く**（依存逆転）
-- `core/model` は独立モジュールとして維持する（domain への吸収はしない。理由は §1）
-- presentation（feature）は `core/domain`（と `core/model`）のみに依存し、`core/data` 以下のデータ層モジュールを参照してはならない（DI 配線を行う `app` を除く）
+- `core/usecase` は `core/model` にのみ依存する。Android フレームワークに依存しない（純 Kotlin。kotlinx-coroutines / javax.inject を許可）
+- Repository は **インターフェースを `core/usecase` に置き、実装を `core/data` に置く**（依存逆転）
+- `core/model` は独立モジュールとして維持する（`core/usecase` への吸収はしない。理由は §1）
+- presentation（feature）は `core/usecase`（と `core/model`）のみに依存し、`core/data` 以下のデータ層モジュールを参照してはならない（DI 配線を行う `app` を除く）
 
 ### モジュール依存図
 
@@ -40,7 +40,7 @@ presentation ──→ core/domain ──→ core/model ←── data
 graph TD
     app --> feature
     app -. DI配線のみ .-> data[core/data]
-    feature[feature/*] --> domain[core/domain]
+    feature[feature/*] --> domain[core/usecase]
     domain --> model[core/model]
     data --> domain
     data --> model
@@ -85,7 +85,7 @@ class FollowTopicUseCase @Inject constructor(
 
 ## 4. Repository 規約
 
-- インターフェースは `core/domain` の repository パッケージに置き、ドメインモデルのみを引数・戻り値に使う
+- インターフェースは `core/usecase` の repository パッケージに置き、ドメインモデルのみを引数・戻り値に使う
 - 実装は `core/data` に置く。実装クラス名は実装特性を表す（`OfflineFirstNewsRepository`）か `Default〜` とする
 - 観察系メソッドは `Flow<T>`、操作系メソッドは `suspend fun` とする（UseCase のシグネチャ区分と対応）
 
@@ -113,7 +113,7 @@ sealed interface BookmarksEvent {
 
 ## 6. Mapper 規約
 
-- モデル変換は必ず **data 側のモジュール**（`core/database` / `core/network` / `core/datastore` / `core/data`）に置く。これらは `core/model` に依存してドメインモデルへ変換する。`core/model` / `core/domain` は data のモデル（Room エンティティ・DTO・Proto）を一切知らない
+- モデル変換は必ず **data 側のモジュール**（`core/database` / `core/network` / `core/datastore` / `core/data`）に置く。これらは `core/model` に依存してドメインモデルへ変換する。`core/model` / `core/usecase` は data のモデル（Room エンティティ・DTO・Proto）を一切知らない
 - 形式は拡張関数とし、命名を統一する:
   - data モデル → ドメインモデル: `toDomain()`
   - ドメインモデル → Room エンティティ: `toEntity()`

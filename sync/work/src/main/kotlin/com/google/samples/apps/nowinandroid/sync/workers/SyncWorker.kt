@@ -32,7 +32,7 @@ import com.google.samples.apps.nowinandroid.core.data.repository.OfflineFirstNew
 import com.google.samples.apps.nowinandroid.core.data.repository.OfflineFirstTopicsRepository
 import com.google.samples.apps.nowinandroid.core.datastore.ChangeListVersions
 import com.google.samples.apps.nowinandroid.core.datastore.NiaPreferencesDataSource
-import com.google.samples.apps.nowinandroid.core.domain.repository.SearchContentsRepository
+import com.google.samples.apps.nowinandroid.core.usecase.repository.SearchContentsRepository
 import com.google.samples.apps.nowinandroid.sync.initializers.SyncConstraints
 import com.google.samples.apps.nowinandroid.sync.initializers.syncForegroundInfo
 import com.google.samples.apps.nowinandroid.sync.status.SyncSubscriber

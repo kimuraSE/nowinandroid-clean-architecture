@@ -17,13 +17,13 @@
 package com.google.samples.apps.nowinandroid.feature.bookmarks.impl
 
 import com.google.samples.apps.nowinandroid.core.data.repository.CompositeUserNewsResourceRepository
-import com.google.samples.apps.nowinandroid.core.domain.usecase.BookmarkNewsResourceUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.MarkNewsResourceViewedUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveBookmarkedNewsUseCase
 import com.google.samples.apps.nowinandroid.core.testing.data.newsResourcesTestData
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestNewsRepository
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
 import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
+import com.google.samples.apps.nowinandroid.core.usecase.BookmarkNewsResourceUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.MarkNewsResourceViewedUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveBookmarkedNewsUseCase
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

@@ -18,11 +18,11 @@ package com.google.samples.apps.nowinandroid.feature.settings.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveUserDataUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.SetDarkThemeConfigUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.SetDynamicColorPreferenceUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.SetThemeBrandUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.UserData
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveUserDataUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.SetDarkThemeConfigUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.SetDynamicColorPreferenceUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.SetThemeBrandUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow

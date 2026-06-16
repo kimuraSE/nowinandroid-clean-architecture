@@ -16,14 +16,14 @@
 
 package com.google.samples.apps.nowinandroid.feature.settings.impl
 
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveUserDataUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.SetDarkThemeConfigUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.SetDynamicColorPreferenceUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.SetThemeBrandUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.DarkThemeConfig.DARK
 import com.google.samples.apps.nowinandroid.core.model.data.ThemeBrand.ANDROID
 import com.google.samples.apps.nowinandroid.core.testing.repository.TestUserDataRepository
 import com.google.samples.apps.nowinandroid.core.testing.util.MainDispatcherRule
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveUserDataUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.SetDarkThemeConfigUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.SetDynamicColorPreferenceUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.SetThemeBrandUseCase
 import com.google.samples.apps.nowinandroid.feature.settings.impl.SettingsUiState.Loading
 import com.google.samples.apps.nowinandroid.feature.settings.impl.SettingsUiState.Success
 import kotlinx.coroutines.flow.collect

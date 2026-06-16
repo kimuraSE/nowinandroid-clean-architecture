@@ -26,7 +26,7 @@ graph TB
     :core:database[database]:::android-library
     :core:datastore[datastore]:::android-library
     :core:datastore-proto[datastore-proto]:::jvm-library
-    :core:domain[domain]:::android-library
+    :core:usecase[domain]:::android-library
     :core:model[model]:::jvm-library
     :core:navigation[navigation]:::android-library
     :core:network[network]:::android-library
@@ -43,13 +43,13 @@ graph TB
   :core:datastore -.-> :core:common
   :core:datastore --> :core:datastore-proto
   :core:datastore --> :core:model
-  :core:domain --> :core:data
-  :core:domain --> :core:model
+  :core:usecase --> :core:data
+  :core:usecase --> :core:model
   :core:network --> :core:common
   :core:network --> :core:model
   :core:notifications -.-> :core:common
   :core:notifications --> :core:model
-  :feature:search:api -.-> :core:domain
+  :feature:search:api -.-> :core:usecase
   :feature:search:api --> :core:navigation
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

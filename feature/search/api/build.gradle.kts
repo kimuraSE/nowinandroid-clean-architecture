@@ -23,5 +23,5 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.domain)
+    implementation(projects.core.usecase)
 }

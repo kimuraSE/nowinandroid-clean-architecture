@@ -18,14 +18,14 @@ package com.google.samples.apps.nowinandroid.feature.topic.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.samples.apps.nowinandroid.core.domain.usecase.BookmarkNewsResourceUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.FollowTopicUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.MarkNewsResourceViewedUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveFollowableTopicUseCase
-import com.google.samples.apps.nowinandroid.core.domain.usecase.ObserveTopicNewsUseCase
 import com.google.samples.apps.nowinandroid.core.model.data.FollowableTopic
 import com.google.samples.apps.nowinandroid.core.model.data.TopicId
 import com.google.samples.apps.nowinandroid.core.model.data.UserNewsResource
+import com.google.samples.apps.nowinandroid.core.usecase.BookmarkNewsResourceUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.FollowTopicUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.MarkNewsResourceViewedUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveFollowableTopicUseCase
+import com.google.samples.apps.nowinandroid.core.usecase.ObserveTopicNewsUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

@@ -56,7 +56,7 @@ graph TB
     :core:datastore[datastore]:::android-library
     :core:datastore-proto[datastore-proto]:::jvm-library
     :core:designsystem[designsystem]:::android-library
-    :core:domain[domain]:::android-library
+    :core:usecase[domain]:::android-library
     :core:model[model]:::jvm-library
     :core:navigation[navigation]:::android-library
     :core:network[network]:::android-library
@@ -96,8 +96,8 @@ graph TB
   :core:datastore -.-> :core:common
   :core:datastore --> :core:datastore-proto
   :core:datastore --> :core:model
-  :core:domain --> :core:data
-  :core:domain --> :core:model
+  :core:usecase --> :core:data
+  :core:usecase --> :core:model
   :core:network --> :core:common
   :core:network --> :core:model
   :core:notifications -.-> :core:common
@@ -113,21 +113,21 @@ graph TB
   :feature:bookmarks:impl -.-> :feature:topic:api
   :feature:foryou:api --> :core:navigation
   :feature:foryou:impl -.-> :core:designsystem
-  :feature:foryou:impl -.-> :core:domain
+  :feature:foryou:impl -.-> :core:usecase
   :feature:foryou:impl -.-> :core:notifications
   :feature:foryou:impl -.-> :core:ui
   :feature:foryou:impl -.-> :feature:foryou:api
   :feature:foryou:impl -.-> :feature:topic:api
   :feature:interests:api --> :core:navigation
   :feature:interests:impl -.-> :core:designsystem
-  :feature:interests:impl -.-> :core:domain
+  :feature:interests:impl -.-> :core:usecase
   :feature:interests:impl -.-> :core:ui
   :feature:interests:impl -.-> :feature:interests:api
   :feature:interests:impl -.-> :feature:topic:api
-  :feature:search:api -.-> :core:domain
+  :feature:search:api -.-> :core:usecase
   :feature:search:api --> :core:navigation
   :feature:search:impl -.-> :core:designsystem
-  :feature:search:impl -.-> :core:domain
+  :feature:search:impl -.-> :core:usecase
   :feature:search:impl -.-> :core:ui
   :feature:search:impl -.-> :feature:interests:api
   :feature:search:impl -.-> :feature:search:api

@@ -16,7 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.core.testing.util
 
-import com.google.samples.apps.nowinandroid.core.domain.util.SyncManager
+import com.google.samples.apps.nowinandroid.core.usecase.util.SyncManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
