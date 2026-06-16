@@ -82,6 +82,7 @@ internal fun BookmarksScreen(
     modifier: Modifier = Modifier,
     viewModel: BookmarksViewModel = hiltViewModel(),
 ) {
+    // ViewModel の uiState（StateFlow）を購読し、最新値を Compose の State として受け取る（前面表示中のみ購読）
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     BookmarksScreen(
         uiState = uiState,
@@ -107,11 +108,13 @@ internal fun BookmarksScreen(
     val bookmarkRemovedMessage = stringResource(id = R.string.feature_bookmarks_api_removed)
     val undoText = stringResource(id = R.string.feature_bookmarks_api_undo)
 
+    //取り消しSnackBarを出すべきか(Successかつフラグがtrueのときのみ)
     val shouldDisplayUndoBookmark =
         (uiState as? BookmarksUiState.Success)?.shouldShowUndoBookmark == true
 
     LaunchedEffect(shouldDisplayUndoBookmark) {
         if (shouldDisplayUndoBookmark) {
+            // 削除Snackbarを表示し、「取り消し」押下なら復活イベント、そうでなければフラグ解除イベントを送る
             val snackBarResult = onShowSnackbar(bookmarkRemovedMessage, undoText)
             if (snackBarResult) {
                 onEvent(BookmarksEvent.UndoBookmarkRemoval)
@@ -167,6 +170,8 @@ private fun BookmarksGrid(
         modifier = modifier
             .fillMaxSize(),
     ) {
+        // 画面外＝未コンポーズ。入ってくる直前（少し先読み）でコンポーズして描画、出ていったら破棄。再入場時はまた構築。
+        // ただし表示中のものは毎フレーム作り直すわけではない（state 変化時のみ再コンポーズ）。
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(300.dp),
             contentPadding = PaddingValues(16.dp),
@@ -179,6 +184,7 @@ private fun BookmarksGrid(
         ) {
             newsFeed(
                 feedState = NewsFeedUiState.Success(feed),
+                // この id は「このラムダが決める値」ではなく、「ラムダを“呼ぶ側”が渡してくる引数」つまりnewsFeedが鍵
                 onNewsResourcesCheckedChanged = { id, _ ->
                     onEvent(BookmarksEvent.RemoveBookmark(NewsResourceId(id)))
                 },

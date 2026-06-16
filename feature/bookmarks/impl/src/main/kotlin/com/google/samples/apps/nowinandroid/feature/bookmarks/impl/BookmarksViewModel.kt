@@ -43,18 +43,20 @@ class BookmarksViewModel @Inject constructor(
     /** 直前に解除したブックマーク。null でなければ「取り消し」を提示中。 */
     private val lastRemovedBookmarkId = MutableStateFlow<NewsResourceId?>(null)
 
+    // 2つの**Flow（値が何度も流れるストリーム）**を監視して、どちらかが新しい値を出すたびに毎回 transform を再実行する
     val uiState: StateFlow<BookmarksUiState> = combine(
         observeBookmarkedNews(),
         lastRemovedBookmarkId,
-        ::toUiState,
+        ::toUiState, // ← 関数自体を値として渡して、ラムダと同じ役割をさせている。::toUiState は { a, b -> toUiState(a, b) }
     )
-        .catch { emit(BookmarksUiState.Error) }
+        .catch { emit(BookmarksUiState.Error) } //emit = Flow が値を1つ下流に送り出すこと（何度でも起きる。受け手は collect）
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = BookmarksUiState.Loading,
         )
 
+    // UIに渡されるイベント管理用メソッド
     fun onEvent(event: BookmarksEvent) {
         when (event) {
             is BookmarksEvent.RemoveBookmark -> removeFromBookmarks(event.id)
@@ -64,6 +66,7 @@ class BookmarksViewModel @Inject constructor(
         }
     }
 
+    // ブックマーク解除：取り消し用に直前 ID を記録（→Snackbar 表示条件が立つ）してから、UseCase で解除を DB へ反映
     private fun removeFromBookmarks(id: NewsResourceId) {
         viewModelScope.launch {
             lastRemovedBookmarkId.value = id
@@ -71,6 +74,7 @@ class BookmarksViewModel @Inject constructor(
         }
     }
 
+    // 取り消し：記録しておいた直前 ID を再ブックマークし、取り消し状態（記録）をクリア
     private fun undoBookmarkRemoval() {
         viewModelScope.launch {
             lastRemovedBookmarkId.value?.let { bookmarkNewsResource(it, bookmarked = true) }
@@ -78,10 +82,12 @@ class BookmarksViewModel @Inject constructor(
         }
     }
 
+    // 取り消し可能状態の破棄：記録を消すだけ（再ブックマークはしない）。Snackbar が押されず消えた時など
     private fun clearUndoState() {
         lastRemovedBookmarkId.value = null
     }
 
+    // ニュースを既読にする（UseCase 経由で DB に反映）
     private fun markViewed(id: NewsResourceId) {
         viewModelScope.launch {
             markNewsResourceViewed(id, viewed = true)

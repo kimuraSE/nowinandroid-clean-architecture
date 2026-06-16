@@ -78,7 +78,7 @@ fun LazyStaggeredGridScope.newsFeed(
                     hasBeenViewed = userNewsResource.hasBeenViewed,
                     onToggleBookmark = {
                         onNewsResourcesCheckedChanged(
-                            userNewsResource.id.value,
+                            userNewsResource.id.value, // こいつが具体的なid識別子を渡している。
                             !userNewsResource.isSaved,
                         )
                     },
