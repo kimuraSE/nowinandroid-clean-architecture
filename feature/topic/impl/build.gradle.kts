@@ -25,7 +25,7 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.data)
+    implementation(projects.core.usecase)
     implementation(projects.feature.topic.api)
 
     implementation(libs.androidx.compose.material3.adaptive.navigation3)

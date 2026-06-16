@@ -27,7 +27,7 @@ android {
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.google.oss.licenses)
-    implementation(projects.core.data)
+    implementation(projects.core.usecase)
 
     testImplementation(projects.core.testing)
 
